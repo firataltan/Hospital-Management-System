@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title} ?: 'Kayıt Ol - Randevu Sistemi'">Kayıt Ol - Randevu Sistemi</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <nav class="nav">
+                <a th:href="@{/}" class="nav-brand">🏥 Randevu Sistemi</a>
+                <ul class="nav-links">
+                    <li><a th:href="@{/}">Ana Sayfa</a></li>
+                    <li><a th:href="@{/login}">Giriş Yap</a></li>
+                    <li><a th:href="@{/register}" class="text-warning">Kayıt Ol</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Ana İçerik -->
+    <main class="container" style="padding: 2rem 0;">
+        <!-- Hata/Başarı Mesajları -->
+        <div th:if="${error}" class="alert alert-danger">
+            <strong>❌ Hata:</strong> <span th:text="${error}">Hata mesajı</span>
+        </div>
+        
+        <div th:if="${success}" class="alert alert-success">
+            <strong>✅ Başarılı:</strong> <span th:text="${success}">Başarı mesajı</span>
+        </div>
+
+        <!-- Kayıt Türü Seçimi -->
+        <div class="text-center mb-4">
+            <h1 style="color: #333; margin-bottom: 1rem;">
+                📝 Hesap Oluşturun
+            </h1>
+            <p style="color: #6c757d; font-size: 1.1rem;">
+                Lütfen kayıt olmak istediğiniz hesap türünü seçin
+            </p>
+            
+            <div style="display: flex; justify-content: center; gap: 1rem; margin: 2rem 0;">
+                <button id="hastaTab" class="btn btn-primary btn-lg" onclick="showTab('hasta')">
+                    🏥 Hasta Olarak Kayıt Ol
+                </button>
+                <button id="doktorTab" class="btn btn-secondary btn-lg" onclick="showTab('doktor')">
+                    👨‍⚕️ Doktor Olarak Kayıt Ol
+                </button>
+            </div>
+        </div>
+
+        <!-- Hasta Kayıt Formu -->
+        <div id="hastaForm" class="form-container">
+            <div class="row">
+                <div class="col-8" style="margin: 0 auto;">
+                    <div class="card fade-in">
+                        <div class="card-header text-center">
+                            <h2 style="margin: 0; color: #333;">
+                                🏥 Hasta Kayıt Formu
+                            </h2>
+                            <p style="margin: 0.5rem 0 0; color: #6c757d;">
+                                Randevu alabilmek için bilgilerinizi girin
+                            </p>
+                        </div>
+                        <div class="card-body">
+                            <form th:action="@{/register/hasta}" method="post" id="hastaRegisterForm">
+                                <div class="row">
+                                    <!-- Sol Kolon -->
+                                    <div class="col-6">
+                                        <!-- Kullanıcı Adı -->
+                                        <div class="form-group">
+                                            <label for="hastaUsername" class="form-label">
+                                                👤 Kullanıcı Adı *
+                                            </label>
+                                            <input type="text" 
+                                                   id="hastaUsername" 
+                                                   name="username" 
+                                                   class="form-control" 
+                                                   placeholder="Kullanıcı adınızı girin"
+                                                   required
+                                                   minlength="3"
+                                                   maxlength="50">
+                                            <small class="availability-message" id="hastaUsernameCheck"></small>
+                                        </div>
+
+                                        <!-- Ad -->
+                                        <div class="form-group">
+                                            <label for="hastaFirstName" class="form-label">
+                                                📝 Ad *
+                                            </label>
+                                            <input type="text" 
+                                                   id="hastaFirstName" 
+                                                   name="firstName" 
+                                                   class="form-control" 
+                                                   placeholder="Adınızı girin"
+                                                   required
+                                                   maxlength="50">
+                                        </div>
+
+                                        <!-- Soyad -->
+                                        <div class="form-group">
+                                            <label for="hastaLastName" class="form-label">
+                                                📝 Soyad *
+                                            </label>
+                                            <input type="text" 
+                                                   id="hastaLastName" 
+                                                   name="lastName" 
+                                                   class="form-control" 
+                                                   placeholder="Soyadınızı girin"
+                                                   required
+                                                   maxlength="50">
+                                        </div>
+
+                                        <!-- Email -->
+                                        <div class="form-group">
+                                            <label for="hastaEmail" class="form-label">
+                                                📧 Email *
+                                            </label>
+                                            <input type="email" 
+                                                   id="hastaEmail" 
+                                                   name="email" 
+                                                   class="form-control" 
+                                                   placeholder="email@ornek.com"
+                                                   required
+                                                   maxlength="100">
+                                            <small class="availability-message" id="hastaEmailCheck"></small>
+                                        </div>
+
+                                        <!-- Telefon -->
+                                        <div class="form-group">
+                                            <label for="hastaPhone" class="form-label">
+                                                📞 Telefon
+                                            </label>
+                                            <input type="tel" 
+                                                   id="hastaPhone" 
+                                                   name="phone" 
+                                                   class="form-control" 
+                                                   placeholder="0555 123 45 67"
+                                                   maxlength="15">
+                                        </div>
+                                    </div>
+
+                                    <!-- Sağ Kolon -->
+                                    <div class="col-6">
+                                        <!-- Şifre -->
+                                        <div class="form-group">
+                                            <label for="hastaPassword" class="form-label">
+                                                🔒 Şifre *
+                                            </label>
+                                            <input type="password" 
+                                                   id="hastaPassword" 
+                                                   name="password" 
+                                                   class="form-control" 
+                                                   placeholder="En az 6 karakter"
+                                                   required
+                                                   minlength="6">
+                                        </div>
+
+                                        <!-- Şifre Tekrar -->
+                                        <div class="form-group">
+                                            <label for="hastaPasswordConfirm" class="form-label">
+                                                🔒 Şifre Tekrar *
+                                            </label>
+                                            <input type="password" 
+                                                   id="hastaPasswordConfirm" 
+                                                   name="passwordConfirm" 
+                                                   class="form-control" 
+                                                   placeholder="Şifrenizi tekrar girin"
+                                                   required
+                                                   minlength="6">
+                                            <small class="password-match-message" id="hastaPasswordMatch"></small>
+                                        </div>
+
+                                        <!-- T.C. Kimlik No -->
+                                        <div class="form-group">
+                                            <label for="hastaTcNo" class="form-label">
+                                                🆔 T.C. Kimlik No
+                                            </label>
+                                            <input type="text" 
+                                                   id="hastaTcNo" 
+                                                   name="tcNo" 
+                                                   class="form-control" 
+                                                   placeholder="12345678901"
+                                                   maxlength="11"
+                                                   pattern="[0-9]{11}">
+                                            <small class="availability-message" id="hastaTcCheck"></small>
+                                        </div>
+
+                                        <!-- Doğum Tarihi -->
+                                        <div class="form-group">
+                                            <label for="hastaBirthDate" class="form-label">
+                                                🎂 Doğum Tarihi
+                                            </label>
+                                            <input type="date" 
+                                                   id="hastaBirthDate" 
+                                                   name="birthDate" 
+                                                   class="form-control">
+                                        </div>
+
+                                        <!-- Cinsiyet -->
+                                        <div class="form-group">
+                                            <label for="hastaGender" class="form-label">
+                                                👫 Cinsiyet
+                                            </label>
+                                            <select id="hastaGender" name="gender" class="form-control form-select">
+                                                <option value="">Seçiniz</option>
+                                                <option value="Erkek">Erkek</option>
+                                                <option value="Kadın">Kadın</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Adres -->
+                                <div class="form-group">
+                                    <label for="hastaAddress" class="form-label">
+                                        🏠 Adres
+                                    </label>
+                                    <textarea id="hastaAddress" 
+                                              name="address" 
+                                              class="form-control textarea" 
+                                              placeholder="Ev/iş adresinizi girin"
+                                              maxlength="500"></textarea>
+                                </div>
+
+                                <!-- Acil Durum İletişim -->
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="form-group">
+                                            <label for="hastaEmergencyContact" class="form-label">
+                                                🚨 Acil Durum İletişim Kişisi
+                                            </label>
+                                            <input type="text" 
+                                                   id="hastaEmergencyContact" 
+                                                   name="emergencyContact" 
+                                                   class="form-control" 
+                                                   placeholder="Yakın akraba adı"
+                                                   maxlength="100">
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="form-group">
+                                            <label for="hastaEmergencyPhone" class="form-label">
+                                                📱 Acil Durum Telefonu
+                                            </label>
+                                            <input type="tel" 
+                                                   id="hastaEmergencyPhone" 
+                                                   name="emergencyPhone" 
+                                                   class="form-control" 
+                                                   placeholder="0555 123 45 67"
+                                                   maxlength="15">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Kayıt Butonu -->
+                                <div class="form-group text-center">
+                                    <button type="submit" class="btn btn-primary btn-lg w-100">
+                                        🏥 Hasta Olarak Kayıt Ol
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Doktor Kayıt Formu -->
+        <div id="doktorForm" class="form-container" style="display: none;">
+            <div class="row">
+                <div class="col-8" style="margin: 0 auto;">
+                    <div class="card fade-in">
+                        <div class="card-header text-center">
+                            <h2 style="margin: 0; color: #333;">
+                                👨‍⚕️ Doktor Kayıt Formu
+                            </h2>
+                            <p style="margin: 0.5rem 0 0; color: #6c757d;">
+                                Randevu verebilmek için bilgilerinizi girin
+                            </p>
+                        </div>
+                        <div class="card-body">
+                            <form th:action="@{/register/doktor}" method="post" id="doktorRegisterForm">
+                                <div class="row">
+                                    <!-- Sol Kolon -->
+                                    <div class="col-6">
+                                        <!-- Kullanıcı Adı -->
+                                        <div class="form-group">
+                                            <label for="doktorUsername" class="form-label">
+                                                👤 Kullanıcı Adı *
+                                            </label>
+                                            <input type="text" 
+                                                   id="doktorUsername" 
+                                                   name="username" 
+                                                   class="form-control" 
+                                                   placeholder="Kullanıcı adınızı girin"
+                                                   required
+                                                   minlength="3"
+                                                   maxlength="50">
+                                            <small class="availability-message" id="doktorUsernameCheck"></small>
+                                        </div>
+
+                                        <!-- Ad -->
+                                        <div class="form-group">
+                                            <label for="doktorFirstName" class="form-label">
+                                                📝 Ad *
+                                            </label>
+                                            <input type="text" 
+                                                   id="doktorFirstName" 
+                                                   name="firstName" 
+                                                   class="form-control" 
+                                                   placeholder="Adınızı girin"
+                                                   required
+                                                   maxlength="50">
+                                        </div>
+
+                                        <!-- Soyad -->
+                                        <div class="form-group">
+                                            <label for="doktorLastName" class="form-label">
+                                                📝 Soyad *
+                                            </label>
+                                            <input type="text" 
+                                                   id="doktorLastName" 
+                                                   name="lastName" 
+                                                   class="form-control" 
+                                                   placeholder="Soyadınızı girin"
+                                                   required
+                                                   maxlength="50">
+                                        </div>
+
+                                        <!-- Email -->
+                                        <div class="form-group">
+                                            <label for="doktorEmail" class="form-label">
+                                                📧 Email *
+                                            </label>
+                                            <input type="email" 
+                                                   id="doktorEmail" 
+                                                   name="email" 
+                                                   class="form-control" 
+                                                   placeholder="email@ornek.com"
+                                                   required
+                                                   maxlength="100">
+                                            <small class="availability-message" id="doktorEmailCheck"></small>
+                                        </div>
+
+                                        <!-- Telefon -->
+                                        <div class="form-group">
+                                            <label for="doktorPhone" class="form-label">
+                                                📞 Telefon
+                                            </label>
+                                            <input type="tel" 
+                                                   id="doktorPhone" 
+                                                   name="phone" 
+                                                   class="form-control" 
+                                                   placeholder="0555 123 45 67"
+                                                   maxlength="15">
+                                        </div>
+
+                                        <!-- Diploma Numarası -->
+                                        <div class="form-group">
+                                            <label for="doktorDiplomaNo" class="form-label">
+                                                🎓 Diploma Numarası *
+                                            </label>
+                                            <input type="text" 
+                                                   id="doktorDiplomaNo" 
+                                                   name="diplomaNo" 
+                                                   class="form-control" 
+                                                   placeholder="DP123456"
+                                                   required
+                                                   maxlength="20">
+                                            <small class="availability-message" id="doktorDiplomaCheck"></small>
+                                        </div>
+                                    </div>
+
+                                    <!-- Sağ Kolon -->
+                                    <div class="col-6">
+                                        <!-- Şifre -->
+                                        <div class="form-group">
+                                            <label for="doktorPassword" class="form-label">
+                                                🔒 Şifre *
+                                            </label>
+                                            <input type="password" 
+                                                   id="doktorPassword" 
+                                                   name="password" 
+                                                   class="form-control" 
+                                                   placeholder="En az 6 karakter"
+                                                   required
+                                                   minlength="6">
+                                        </div>
+
+                                        <!-- Şifre Tekrar -->
+                                        <div class="form-group">
+                                            <label for="doktorPasswordConfirm" class="form-label">
+                                                🔒 Şifre Tekrar *
+                                            </label>
+                                            <input type="password" 
+                                                   id="doktorPasswordConfirm" 
+                                                   name="passwordConfirm" 
+                                                   class="form-control" 
+                                                   placeholder="Şifrenizi tekrar girin"
+                                                   required
+                                                   minlength="6">
+                                            <small class="password-match-message" id="doktorPasswordMatch"></small>
+                                        </div>
+
+                                        <!-- Uzmanlık Alanı -->
+                                        <div class="form-group">
+                                            <label for="doktorSpecialization" class="form-label">
+                                                🩺 Uzmanlık Alanı *
+                                            </label>
+                                            <select id="doktorSpecialization" name="specialization" class="form-control form-select" required>
+                                                <option value="">Seçiniz</option>
+                                                <option value="Kardiyoloji">Kardiyoloji</option>
+                                                <option value="Nöroloji">Nöroloji</option>
+                                                <option value="Ortopedi">Ortopedi</option>
+                                                <option value="Göğüs Hastalıkları">Göğüs Hastalıkları</option>
+                                                <option value="Dahiliye">Dahiliye</option>
+                                                <option value="Üroloji">Üroloji</option>
+                                                <option value="Kadın Doğum">Kadın Doğum</option>
+                                                <option value="Çocuk Sağlığı">Çocuk Sağlığı</option>
+                                                <option value="Göz Hastalıkları">Göz Hastalıkları</option>
+                                                <option value="Kulak Burun Boğaz">Kulak Burun Boğaz</option>
+                                                <option value="Cildiye">Cildiye</option>
+                                                <option value="Psikiyatri">Psikiyatri</option>
+                                                <option value="Diğer">Diğer</option>
+                                            </select>
+                                        </div>
+
+                                        <!-- Hastane -->
+                                        <div class="form-group">
+                                            <label for="doktorHospital" class="form-label">
+                                                🏥 Hastane/Klinik
+                                            </label>
+                                            <input type="text" 
+                                                   id="doktorHospital" 
+                                                   name="hospital" 
+                                                   class="form-control" 
+                                                   placeholder="Çalıştığınız hastane"
+                                                   maxlength="200">
+                                        </div>
+
+                                        <!-- Deneyim Yılı -->
+                                        <div class="form-group">
+                                            <label for="doktorExperience" class="form-label">
+                                                📅 Deneyim (Yıl)
+                                            </label>
+                                            <input type="number" 
+                                                   id="doktorExperience" 
+                                                   name="experienceYears" 
+                                                   class="form-control" 
+                                                   placeholder="5"
+                                                   min="0"
+                                                   max="50">
+                                            </div>
+
+                                       <!-- Randevu Ücreti -->
+                                       <div class="form-group">
+                                           <label for="doktorFee" class="form-label">
+                                               💰 Randevu Ücreti (TL)
+                                           </label>
+                                           <input type="number" 
+                                                  id="doktorFee" 
+                                                  name="consultationFee" 
+                                                  class="form-control" 
+                                                  placeholder="200"
+                                                  min="0"
+                                                  step="0.01">
+                                       </div>
+                                   </div>
+                               </div>
+
+                               <!-- Muayenehane Adresi -->
+                               <div class="form-group">
+                                   <label for="doktorClinicAddress" class="form-label">
+                                       🏢 Muayenehane Adresi
+                                   </label>
+                                   <textarea id="doktorClinicAddress" 
+                                             name="clinicAddress" 
+                                             class="form-control textarea" 
+                                             placeholder="Muayenehane adresinizi girin"
+                                             maxlength="500"></textarea>
+                               </div>
+
+                               <!-- Hakkında -->
+                               <div class="form-group">
+                                   <label for="doktorAbout" class="form-label">
+                                       📋 Hakkınızda
+                                   </label>
+                                   <textarea id="doktorAbout" 
+                                             name="about" 
+                                             class="form-control textarea" 
+                                             placeholder="Kendiniz ve uzmanlığınız hakkında kısa bilgi"
+                                             maxlength="1000"></textarea>
+                               </div>
+
+                               <!-- Kayıt Butonu -->
+                               <div class="form-group text-center">
+                                   <button type="submit" class="btn btn-primary btn-lg w-100">
+                                       👨‍⚕️ Doktor Olarak Kayıt Ol
+                                   </button>
+                               </div>
+                           </form>
+                       </div>
+                   </div>
+               </div>
+           </div>
+       </div>
+
+       <!-- Giriş Yap Bağlantısı -->
+       <div class="text-center mt-4">
+           <p style="color: #6c757d;">
+               Zaten hesabınız var mı? 
+               <a th:href="@{/login}" style="color: #007bff; text-decoration: none; font-weight: 600;">
+                   Giriş Yapın
+               </a>
+           </p>
+       </div>
+   </main>
+
+   <!-- Footer -->
+   <footer class="footer">
+       <div class="container">
+           <p>&copy; 2025 Randevu Sistemi. Tüm hakları saklıdır.</p>
+       </div>
+   </footer>
+
+   <!-- JavaScript -->
+   <script>
+       // Tab değiştirme fonksiyonu
+       function showTab(tab) {
+           const hastaForm = document.getElementById('hastaForm');
+           const doktorForm = document.getElementById('doktorForm');
+           const hastaTab = document.getElementById('hastaTab');
+           const doktorTab = document.getElementById('doktorTab');
+
+           if (tab === 'hasta') {
+               hastaForm.style.display = 'block';
+               doktorForm.style.display = 'none';
+               hastaTab.className = 'btn btn-primary btn-lg';
+               doktorTab.className = 'btn btn-secondary btn-lg';
+           } else {
+               hastaForm.style.display = 'none';
+               doktorForm.style.display = 'block';
+               hastaTab.className = 'btn btn-secondary btn-lg';
+               doktorTab.className = 'btn btn-primary btn-lg';
+           }
+       }
+
+       // Kullanıcı adı kontrolü (debounced)
+       function checkUsername(username, elementId, userType) {
+           if (username.length < 3) {
+               document.getElementById(elementId).innerHTML = '';
+               return;
+           }
+
+           fetch(`/check-username?username=${encodeURIComponent(username)}`)
+               .then(response => response.json())
+               .then(data => {
+                   const element = document.getElementById(elementId);
+                   if (data.exists) {
+                       element.innerHTML = '❌ Bu kullanıcı adı zaten kullanılıyor';
+                       element.style.color = '#dc3545';
+                   } else {
+                       element.innerHTML = '✅ Kullanıcı adı uygun';
+                       element.style.color = '#28a745';
+                   }
+               })
+               .catch(error => {
+                   console.error('Error:', error);
+               });
+       }
+
+       // Email kontrolü
+       function checkEmail(email, elementId) {
+           if (!email || !email.includes('@')) {
+               document.getElementById(elementId).innerHTML = '';
+               return;
+           }
+
+           fetch(`/check-email?email=${encodeURIComponent(email)}`)
+               .then(response => response.json())
+               .then(data => {
+                   const element = document.getElementById(elementId);
+                   if (data.exists) {
+                       element.innerHTML = '❌ Bu email adresi zaten kullanılıyor';
+                       element.style.color = '#dc3545';
+                   } else {
+                       element.innerHTML = '✅ Email adresi uygun';
+                       element.style.color = '#28a745';
+                   }
+               })
+               .catch(error => {
+                   console.error('Error:', error);
+               });
+       }
+
+       // T.C. kimlik no kontrolü
+       function checkTcNo(tcNo) {
+           if (!tcNo || tcNo.length !== 11) {
+               document.getElementById('hastaTcCheck').innerHTML = '';
+               return;
+           }
+
+           fetch(`/check-tcno?tcNo=${encodeURIComponent(tcNo)}`)
+               .then(response => response.json())
+               .then(data => {
+                   const element = document.getElementById('hastaTcCheck');
+                   if (data.exists) {
+                       element.innerHTML = '❌ Bu T.C. kimlik numarası zaten kayıtlı';
+                       element.style.color = '#dc3545';
+                   } else {
+                       element.innerHTML = '✅ T.C. kimlik numarası uygun';
+                       element.style.color = '#28a745';
+                   }
+               })
+               .catch(error => {
+                   console.error('Error:', error);
+               });
+       }
+
+       // Diploma numarası kontrolü
+       function checkDiplomaNo(diplomaNo) {
+           if (!diplomaNo || diplomaNo.length < 3) {
+               document.getElementById('doktorDiplomaCheck').innerHTML = '';
+               return;
+           }
+
+           fetch(`/check-diploma?diplomaNo=${encodeURIComponent(diplomaNo)}`)
+               .then(response => response.json())
+               .then(data => {
+                   const element = document.getElementById('doktorDiplomaCheck');
+                   if (data.exists) {
+                       element.innerHTML = '❌ Bu diploma numarası zaten kayıtlı';
+                       element.style.color = '#dc3545';
+                   } else {
+                       element.innerHTML = '✅ Diploma numarası uygun';
+                       element.style.color = '#28a745';
+                   }
+               })
+               .catch(error => {
+                   console.error('Error:', error);
+               });
+       }
+
+       // Şifre eşleşme kontrolü
+       function checkPasswordMatch(password, confirmPassword, elementId) {
+           const element = document.getElementById(elementId);
+           
+           if (!confirmPassword) {
+               element.innerHTML = '';
+               return;
+           }
+
+           if (password === confirmPassword) {
+               element.innerHTML = '✅ Şifreler eşleşiyor';
+               element.style.color = '#28a745';
+           } else {
+               element.innerHTML = '❌ Şifreler eşleşmiyor';
+               element.style.color = '#dc3545';
+           }
+       }
+
+       // Event listener'ları ekle
+       document.addEventListener('DOMContentLoaded', function() {
+           // Hasta form event listeners
+           let hastaUsernameTimeout;
+           document.getElementById('hastaUsername').addEventListener('input', function(e) {
+               clearTimeout(hastaUsernameTimeout);
+               hastaUsernameTimeout = setTimeout(() => {
+                   checkUsername(e.target.value, 'hastaUsernameCheck', 'hasta');
+               }, 500);
+           });
+
+           let hastaEmailTimeout;
+           document.getElementById('hastaEmail').addEventListener('input', function(e) {
+               clearTimeout(hastaEmailTimeout);
+               hastaEmailTimeout = setTimeout(() => {
+                   checkEmail(e.target.value, 'hastaEmailCheck');
+               }, 500);
+           });
+
+           let hastaTcTimeout;
+           document.getElementById('hastaTcNo').addEventListener('input', function(e) {
+               clearTimeout(hastaTcTimeout);
+               hastaTcTimeout = setTimeout(() => {
+                   checkTcNo(e.target.value);
+               }, 500);
+           });
+
+           document.getElementById('hastaPasswordConfirm').addEventListener('input', function(e) {
+               const password = document.getElementById('hastaPassword').value;
+               checkPasswordMatch(password, e.target.value, 'hastaPasswordMatch');
+           });
+
+           // Doktor form event listeners
+           let doktorUsernameTimeout;
+           document.getElementById('doktorUsername').addEventListener('input', function(e) {
+               clearTimeout(doktorUsernameTimeout);
+               doktorUsernameTimeout = setTimeout(() => {
+                   checkUsername(e.target.value, 'doktorUsernameCheck', 'doktor');
+               }, 500);
+           });
+
+           let doktorEmailTimeout;
+           document.getElementById('doktorEmail').addEventListener('input', function(e) {
+               clearTimeout(doktorEmailTimeout);
+               doktorEmailTimeout = setTimeout(() => {
+                   checkEmail(e.target.value, 'doktorEmailCheck');
+               }, 500);
+           });
+
+           let doktorDiplomaTimeout;
+           document.getElementById('doktorDiplomaNo').addEventListener('input', function(e) {
+               clearTimeout(doktorDiplomaTimeout);
+               doktorDiplomaTimeout = setTimeout(() => {
+                   checkDiplomaNo(e.target.value);
+               }, 500);
+           });
+
+           document.getElementById('doktorPasswordConfirm').addEventListener('input', function(e) {
+               const password = document.getElementById('doktorPassword').value;
+               checkPasswordMatch(password, e.target.value, 'doktorPasswordMatch');
+           });
+
+           // T.C. kimlik no sadece rakam kabul etsin
+           document.getElementById('hastaTcNo').addEventListener('input', function(e) {
+               e.target.value = e.target.value.replace(/[^0-9]/g, '');
+           });
+
+           // Telefon numarası formatı
+           const phoneInputs = document.querySelectorAll('input[type="tel"]');
+           phoneInputs.forEach(input => {
+               input.addEventListener('input', function(e) {
+                   let value = e.target.value.replace(/[^0-9]/g, '');
+                   if (value.length > 0) {
+                       if (value.length <= 4) {
+                           value = value;
+                       } else if (value.length <= 7) {
+                           value = value.slice(0, 4) + ' ' + value.slice(4);
+                       } else if (value.length <= 9) {
+                           value = value.slice(0, 4) + ' ' + value.slice(4, 7) + ' ' + value.slice(7);
+                       } else {
+                           value = value.slice(0, 4) + ' ' + value.slice(4, 7) + ' ' + value.slice(7, 9) + ' ' + value.slice(9, 11);
+                       }
+                   }
+                   e.target.value = value;
+               });
+           });
+       });
+
+       // Form validasyonu
+       document.getElementById('hastaRegisterForm').addEventListener('submit', function(e) {
+           const password = document.getElementById('hastaPassword').value;
+           const confirmPassword = document.getElementById('hastaPasswordConfirm').value;
+           
+           if (password !== confirmPassword) {
+               e.preventDefault();
+               alert('⚠️ Şifreler eşleşmiyor!');
+               return;
+           }
+
+           const tcNo = document.getElementById('hastaTcNo').value;
+           if (tcNo && (tcNo.length !== 11 || !/^[0-9]+$/.test(tcNo))) {
+               e.preventDefault();
+               alert('⚠️ T.C. kimlik numarası 11 haneli olmalıdır!');
+               return;
+           }
+       });
+
+       document.getElementById('doktorRegisterForm').addEventListener('submit', function(e) {
+           const password = document.getElementById('doktorPassword').value;
+           const confirmPassword = document.getElementById('doktorPasswordConfirm').value;
+           
+           if (password !== confirmPassword) {
+               e.preventDefault();
+               alert('⚠️ Şifreler eşleşmiyor!');
+               return;
+           }
+       });
+
+       // Sayfa yüklendiğinde hasta formu göster
+       showTab('hasta');
+   </script>
+
+   <style>
+       .availability-message {
+           display: block;
+           margin-top: 0.25rem;
+           font-weight: 600;
+       }
+
+       .password-match-message {
+           display: block;
+           margin-top: 0.25rem;
+           font-weight: 600;
+       }
+
+       .form-container {
+           animation: fadeIn 0.5s ease-out;
+       }
+
+       @media (max-width: 768px) {
+           .col-6 {
+               flex: 0 0 100%;
+               max-width: 100%;
+           }
+           
+           #hastaTab, #doktorTab {
+               width: 100%;
+               margin-bottom: 0.5rem;
+           }
+       }
+   </style>
+</body>
+</html> 

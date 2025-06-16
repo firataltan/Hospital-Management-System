@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title} ?: 'Çalışma Saatleri'">Çalışma Saatleri</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <nav class="nav">
+                <a th:href="@{/doktor/dashboard}" class="nav-brand">🏥 Randevu Sistemi</a>
+                <ul class="nav-links">
+                    <li><a th:href="@{/doktor/dashboard}">Dashboard</a></li>
+                    <li><a th:href="@{/doktor/randevular}">Randevular</a></li>
+                    <li><a th:href="@{/doktor/profil}">Profilim</a></li>
+                    <li><a th:href="@{/doktor/calisma-saatleri}" class="text-warning">Çalışma Saatleri</a></li>
+                    <li>
+                        <form th:action="@{/logout}" method="post" style="display: inline;">
+                            <button type="submit" class="nav-link" style="background: none; border: none; color: inherit; cursor: pointer; padding: 0;">
+                                Çıkış
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Ana İçerik -->
+    <main class="container" style="padding: 2rem 0;">
+        <!-- Sayfa Başlığı -->
+        <div class="mb-4">
+            <h1 style="color: #333; margin-bottom: 0.5rem;">
+                ⏰ Çalışma Saatleri ve Randevu Ayarları
+            </h1>
+            <p style="color: #6c757d; font-size: 1.1rem; margin: 0;">
+                Randevu kabul durumunuzu, çalışma saatlerinizi ve randevu süresini ayarlayın
+            </p>
+        </div>
+
+        <!-- Alert Mesajları -->
+        <div th:if="${success}" class="alert alert-success">
+            <strong>✅ Başarılı:</strong> <span th:text="${success}">Başarı mesajı</span>
+        </div>
+        
+        <div th:if="${error}" class="alert alert-danger">
+            <strong>❌ Hata:</strong> <span th:text="${error}">Hata mesajı</span>
+        </div>
+
+        <div class="row">
+            <!-- Çalışma Saatleri Formu -->
+            <div class="col-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 style="margin: 0; color: #333;">
+                            ⚙️ Çalışma Saatleri
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/doktor/calisma-saatleri}" method="post" id="calismaSaatiForm">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="workStartTime" class="form-label">Başlangıç Saati *</label>
+                                        <input type="time" 
+                                               id="workStartTime" 
+                                               name="workStartTime" 
+                                               class="form-control" 
+                                               th:value="${doktor.workStartTime}" 
+                                               required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="workEndTime" class="form-label">Bitiş Saati *</label>
+                                        <input type="time" 
+                                               id="workEndTime" 
+                                               name="workEndTime" 
+                                               class="form-control" 
+                                               th:value="${doktor.workEndTime}" 
+                                               required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="appointmentDuration" class="form-label">Randevu Süresi (Dakika) *</label>
+                                <select id="appointmentDuration" name="appointmentDuration" class="form-control form-select" required>
+                                    <option value="">Seçiniz</option>
+                                    <option value="15" th:selected="${doktor.appointmentDuration == 15}">15 Dakika</option>
+                                    <option value="20" th:selected="${doktor.appointmentDuration == 20}">20 Dakika</option>
+                                    <option value="30" th:selected="${doktor.appointmentDuration == 30}">30 Dakika</option>
+                                    <option value="45" th:selected="${doktor.appointmentDuration == 45}">45 Dakika</option>
+                                    <option value="60" th:selected="${doktor.appointmentDuration == 60}">60 Dakika</option>
+                                </select>
+                            </div>
+                            
+                            <div class="text-end">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    💾 Çalışma Saatlerini Kaydet
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Randevu Kabul Durumu -->
+            <div class="col-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 style="margin: 0; color: #333;">
+                            📊 Randevu Kabul Durumu
+                        </h3>
+                    </div>
+                    <div class="card-body text-center">
+                        <div style="font-size: 4rem; margin-bottom: 1rem;" 
+                             th:text="${doktor.acceptingAppointments ? '✅' : '⏸️'}">✅</div>
+                        <h4 style="margin-bottom: 1rem; color: #333;">
+                            <span th:if="${doktor.acceptingAppointments}">Randevu Kabul Ediyor</span>
+                            <span th:unless="${doktor.acceptingAppointments}">Randevu Kabul Etmiyor</span>
+                        </h4>
+                        <p style="color: #6c757d; margin-bottom: 1.5rem;">
+                            Randevu almayı <span th:if="${doktor.acceptingAppointments}">durdurabilir</span>
+                            <span th:unless="${doktor.acceptingAppointments}">başlatabilir</span>siniz.
+                        </p>
+                        <form th:action="@{/doktor/toggle-appointments}" method="post">
+                            <button type="submit" 
+                                    class="btn w-100"
+                                    th:classappend="${doktor.acceptingAppointments ? 'btn-danger' : 'btn-success'}">
+                                <span th:if="${doktor.acceptingAppointments}">⏸️ Randevu Kabulünü Durdur</span>
+                                <span th:unless="${doktor.acceptingAppointments}">▶️ Randevu Kabulünü Başlat</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 Randevu Sistemi. Tüm hakları saklıdır.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Form validasyonu
+        document.getElementById('calismaSaatiForm').addEventListener('submit', function(e) {
+            const startTime = document.getElementById('workStartTime').value;
+            const endTime = document.getElementById('workEndTime').value;
+            
+            if (startTime && endTime) {
+                const start = new Date('2000/01/01 ' + startTime);
+                const end = new Date('2000/01/01 ' + endTime);
+
+                if (start >= end) {
+                    e.preventDefault();
+                    alert('⚠️ Başlangıç saati bitiş saatinden önce olmalıdır!');
+                    return;
+                }
+            }
+        });
+    </script>
+</body>
+</html> 

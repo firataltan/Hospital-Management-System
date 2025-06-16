@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title} ?: 'Randevu Yönetimi'">Randevu Yönetimi</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <nav class="nav">
+                <a th:href="@{/doktor/dashboard}" class="nav-brand">🏥 Randevu Sistemi</a>
+                <ul class="nav-links">
+                    <li><a th:href="@{/doktor/dashboard}">Dashboard</a></li>
+                    <li><a th:href="@{/doktor/randevular}" class="text-warning">Randevular</a></li>
+                    <li><a th:href="@{/doktor/profil}">Profilim</a></li>
+                    <li><a th:href="@{/doktor/calisma-saatleri}">Çalışma Saatleri</a></li>
+                    <li>
+                        <form th:action="@{/logout}" method="post" style="display: inline;">
+                            <button type="submit" class="nav-link" style="background: none; border: none; color: inherit; cursor: pointer; padding: 0;">
+                                Çıkış
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Ana İçerik -->
+    <main class="container" style="padding: 2rem 0;">
+        <!-- Sayfa Başlığı -->
+        <div class="mb-4">
+            <h1 style="color: #333; margin-bottom: 0.5rem;">
+                📅 Randevu Yönetimi
+            </h1>
+            <p style="color: #6c757d; font-size: 1.1rem; margin: 0;">
+                Randevularınızı görüntüleyin, onaylayın veya reddedin
+            </p>
+        </div>
+
+        <!-- Alert Mesajları -->
+        <div th:if="${success}" class="alert alert-success">
+            <strong>✅ Başarılı:</strong> <span th:text="${success}">Başarı mesajı</span>
+        </div>
+        
+        <div th:if="${error}" class="alert alert-danger">
+            <strong>❌ Hata:</strong> <span th:text="${error}">Hata mesajı</span>
+        </div>
+
+        <!-- İstatistik ve Filtre Bölümü -->
+        <div class="row mb-4">
+            <!-- İstatistikler -->
+            <div class="col-8">
+                <div class="dashboard-stats" style="grid-template-columns: repeat(5, 1fr);">
+                    <div class="stat-card" style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);">
+                        <div class="stat-number" th:text="${toplamSayi}">0</div>
+                        <div class="stat-label">Toplam Randevu</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%); color: #212529;">
+                        <div class="stat-number" th:text="${bekleyenSayi}">0</div>
+                        <div class="stat-label">Bekleyen</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);">
+                        <div class="stat-number" th:text="${onaylananSayi}">0</div>
+                        <div class="stat-label">Onaylanan</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);">
+                        <div class="stat-number" th:text="${reddedilenSayi}">0</div>
+                        <div class="stat-label">Reddedilen</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #17a2b8 0%, #117a8b 100%);">
+                        <div class="stat-number" th:text="${bugunSayi}">0</div>
+                        <div class="stat-label">Bugünkü</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hızlı İşlemler -->
+            <div class="col-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 style="margin: 0; color: #333;">⚡ Hızlı İşlemler</h3>
+                    </div>
+                    <div class="card-body">
+                        <button type="button" class="btn btn-success w-100 mb-2" onclick="bulkApprove()">
+                            ✅ Toplu Onayla
+                        </button>
+                        <button type="button" class="btn btn-primary w-100 mb-2" onclick="exportAppointments()">
+                            📊 Randevuları Dışa Aktar
+                        </button>
+                        <button type="button" class="btn btn-secondary w-100" onclick="printSchedule()">
+                            🖨️ Program Yazdır
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtre Butonları -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; margin-bottom: 1rem;">
+                    <span style="font-weight: 600; color: #495057;">Filtrele:</span>
+                    <a th:href="@{/doktor/randevular}" 
+                       class="btn"
+                       th:classappend="${activeFilter == 'tumu' ? 'btn-primary' : 'btn-secondary'}">
+                        📋 Tümü (<span th:text="${toplamSayi}">0</span>)
+                    </a>
+                    <a th:href="@{/doktor/randevular(status='bekleyen')}" 
+                       class="btn"
+                       th:classappend="${activeFilter == 'bekleyen' ? 'btn-warning' : 'btn-secondary'}">
+                        ⏳ Bekleyen (<span th:text="${bekleyenSayi}">0</span>)
+                    </a>
+                    <a th:href="@{/doktor/randevular(status='onaylanan')}" 
+                       class="btn"
+                       th:classappend="${activeFilter == 'onaylanan' ? 'btn-success' : 'btn-secondary'}">
+                        ✅ Onaylanan (<span th:text="${onaylananSayi}">0</span>)
+                    </a>
+                    <a th:href="@{/doktor/randevular(status='reddedilen')}" 
+                       class="btn"
+                       th:classappend="${activeFilter == 'reddedilen' ? 'btn-danger' : 'btn-secondary'}">
+                        ❌ Reddedilen (<span th:text="${reddedilenSayi}">0</span>)
+                    </a>
+                    <a th:href="@{/doktor/randevular(status='bugun')}" 
+                       class="btn"
+                       th:classappend="${activeFilter == 'bugun' ? 'btn-info' : 'btn-secondary'}">
+                        📅 Bugün (<span th:text="${bugunSayi}">0</span>)
+                    </a>
+                </div>
+                
+                <!-- Tarih Filtresi -->
+                <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                    <span style="font-weight: 600; color: #495057;">Tarih Filtresi:</span>
+                    <input type="date" 
+                           id="dateFilter" 
+                           class="form-control" 
+                           style="width: auto;"
+                           th:value="${selectedDate}"
+                           onchange="filterByDate(this.value)">
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="clearDateFilter()">
+                        🗑️ Temizle
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Randevu Listesi -->
+        <div class="card">
+            <div class="card-header">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="margin: 0; color: #333;">
+                        📅 Randevu Listesi
+                        <span th:if="${activeFilter == 'bekleyen'}">(Onay Bekleyen)</span>
+                        <span th:if="${activeFilter == 'onaylanan'}">(Onaylanan)</span>
+                        <span th:if="${activeFilter == 'reddedilen'}">(Reddedilen)</span>
+                        <span th:if="${activeFilter == 'bugun'}">(Bugünkü)</span>
+                    </h3>
+                    <div style="color: #6c757d;">
+                        <span th:text="${#lists.size(randevular)}">0</span> randevu gösteriliyor
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Randevu Kartları -->
+                <div th:if="${not #lists.isEmpty(randevular)}">
+                    <div th:each="randevu, iterStat : ${randevular}" 
+                         class="randevu-card"
+                         th:classappend="${randevu.status.name().toLowerCase()}"
+                         style="margin-bottom: 1.5rem;">
+                        
+                        <div class="randevu-header">
+                            <div style="flex: 1;">
+                                <!-- Randevu Checkbox (Toplu işlemler için) -->
+                                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+                                    <input type="checkbox" 
+                                           class="randevu-checkbox" 
+                                           th:value="${randevu.id}"
+                                           th:disabled="${randevu.status.name() != 'BEKLEMEDE'}">
+                                    <div class="randevu-time">
+                                        📅 <span th:text="${randevu.formattedAppointmentDateTime}">15 Haziran 2025, 14:30</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Hasta Bilgileri -->
+                                <div class="randevu-patient" style="margin: 0.5rem 0;">
+                                    👤 <span th:text="${randevu.hasta.fullName}">Ahmet Yılmaz</span>
+                                </div>
+                                
+                                <div style="color: #6c757d; font-size: 0.9rem; margin-bottom: 0.5rem;">
+                                    📧 <span th:text="${randevu.hasta.email}">hasta@email.com</span>
+                                    <span th:if="${randevu.hasta.phone}"> • 📞 <span th:text="${randevu.hasta.phone}">0555 123 45 67</span></span>
+                                    <span th:if="${randevu.hasta.age > 0}"> • 🎂 <span th:text="${randevu.hasta.age + ' yaş'}">25 yaş</span></span>
+                                </div>
+                            </div>
+                            
+                            <div style="text-align: right;">
+                                <!-- Durum Badge -->
+                                <span class="badge" 
+                                      th:classappend="'badge-' + ${randevu.status.cssClass}"
+                                      th:text="${randevu.status.displayName}"
+                                      style="font-size: 0.8rem; margin-bottom: 0.5rem;">
+                                    Onaylandı
+                                </span>
+                                
+                                <!-- Randevu Numarası -->
+                                <div style="color: #6c757d; font-size: 0.8rem;">
+                                    Randevu No: <span th:text="${randevu.id}">123</span>
+                                </div>
+                                
+                                <!-- İptal Durumu -->
+                                <div th:if="${randevu.cancelled}" style="color: #dc3545; font-size: 0.8rem; margin-top: 0.25rem;">
+                                    ❌ İptal Edildi
+                                </div>
+
+                                <!-- Geçmiş/Gelecek İndikatörü -->
+                                <div style="margin-top: 0.25rem;">
+                                    <span th:if="${randevu.past}" class="badge badge-secondary" style="font-size: 0.7rem;">
+                                        📚 Geçmiş
+                                    </span>
+                                    <span th:if="${randevu.future and not randevu.cancelled}" class="badge badge-info" style="font-size: 0.7rem;">
+                                        ⏰ Gelecek
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Hasta Şikayeti -->
+                        <div th:if="${randevu.complaint}" 
+                             style="margin: 1rem 0; padding: 0.75rem; background: #f8f9fa; border-radius: 5px;">
+                            <strong style="color: #495057;">💬 Hasta Şikayeti:</strong><br>
+                            <span th:text="${randevu.complaint}" style="color: #6c757d;">Hasta şikayeti</span>
+                        </div>
+                        
+                        <!-- Doktor Notları -->
+                        <div th:if="${randevu.doctorNotes}" 
+                             style="margin: 1rem 0; padding: 0.75rem; background: #e8f5e8; border-radius: 5px; border-left: 4px solid #28a745;">
+                            <strong style="color: #155724;">👨‍⚕️ Doktor Notları:</strong><br>
+                            <span th:text="${randevu.doctorNotes}" style="color: #155724;">Doktor notları</span>
+                        </div>
+                        
+                        <!-- İptal Sebebi -->
+                        <div th:if="${randevu.cancelled and randevu.cancellationReason}" 
+                             style="margin: 1rem 0; padding: 0.75rem; background: #f8d7da; border-radius: 5px; border-left: 4px solid #dc3545;">
+                            <strong style="color: #721c24;">❌ İptal Sebebi:</strong><br>
+                            <span th:text="${randevu.cancellationReason}" style="color: #721c24;">İptal sebebi</span>
+                        </div>
+                        
+                        <!-- İşlem Butonları -->
+                        <div style="margin-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            <!-- Detay Görüntüle -->
+                            <a th:href="@{'/doktor/randevu/' + ${randevu.id}}" 
+                               class="btn btn-primary btn-sm">
+                                📋 Detayları Görüntüle
+                            </a>
+                            
+                            <!-- Onayla Butonu (sadece bekleyen randevular için) -->
+                            <button th:if="${randevu.canBeApproved()}"
+                                    type="button"
+                                    class="btn btn-success btn-sm"
+                                    th:data-randevu-id="${randevu.id}"
+                                    th:data-hasta-adi="${randevu.hasta.fullName}"
+                                    th:data-randevu-tarih="${randevu.formattedAppointmentDateTime}"
+                                    onclick="showApproveModalFromButton(this)">
+                                ✅ Onayla
+                            </button>
+                            
+                            <!-- Reddet Butonu (sadece bekleyen randevular için) -->
+                            <button th:if="${randevu.status.name() == 'BEKLEMEDE' and not randevu.cancelled}"
+                                    type="button"
+                                    class="btn btn-danger btn-sm"
+                                    th:data-randevu-id="${randevu.id}"
+                                    th:data-hasta-adi="${randevu.hasta.fullName}"
+                                    th:data-randevu-tarih="${randevu.formattedAppointmentDateTime}"
+                                    onclick="showRejectModalFromButton(this)">
+                                ❌ Reddet
+                            </button>
+                            
+                            <!-- Not Ekle/Düzenle Butonu -->
+                            <button type="button"
+                                    class="btn btn-secondary btn-sm"
+                                    th:data-randevu-id="${randevu.id}"
+                                    th:data-hasta-adi="${randevu.hasta.fullName}"
+                                    th:data-mevcut-not="${randevu.doctorNotes ?: ''}"
+                                    onclick="showNotesModalFromButton(this)">
+                                📝 Not Ekle
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Randevu Yok Mesajı -->
+                <div th:if="${#lists.isEmpty(randevular)}" 
+                     style="text-align: center; padding: 3rem;">
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">📅</div>
+                    <h4 style="color: #6c757d; margin-bottom: 1rem;">
+                        <span th:if="${activeFilter == 'bekleyen'}">Onay Bekleyen Randevu Yok</span>
+                        <span th:if="${activeFilter == 'onaylanan'}">Onaylanmış Randevu Yok</span>
+                        <span th:if="${activeFilter == 'reddedilen'}">Reddedilmiş Randevu Yok</span>
+                        <span th:if="${activeFilter == 'bugun'}">Bugün Randevunuz Yok</span>
+                        <span th:unless="${activeFilter == 'bekleyen' or activeFilter == 'onaylanan' or activeFilter == 'reddedilen' or activeFilter == 'bugun'}">Henüz Randevunuz Yok</span>
+                    </h4>
+                    <p style="color: #6c757d; margin-bottom: 2rem;">
+                        <span th:if="${activeFilter == 'bekleyen'}">Tüm randevular işlenmiş durumda.</span>
+                        <span th:if="${activeFilter == 'bugun'}">Bugün için bir randevunuz bulunmuyor.</span>
+                        <span th:unless="${activeFilter == 'bekleyen' or activeFilter == 'bugun'}">Filtreleme kriterlerini değiştirmeyi deneyebilirsiniz.</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Onayla Modal -->
+    <div id="approveModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">✅ Randevu Onayla</h2>
+                <span class="close" onclick="closeModals()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="approveInfo" style="background: #d4edda; padding: 1rem; border-radius: 5px; margin-bottom: 1rem;">
+                    <!-- Randevu bilgileri buraya dinamik olarak yüklenecek -->
+                </div>
+                
+                <form id="approveForm" method="post" style="display: inline;">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <div class="form-group">
+                        <label for="approveNotes" class="form-label">📝 Doktor Notları (Opsiyonel)</label>
+                        <textarea id="approveNotes" 
+                                  name="doctorNotes" 
+                                  class="form-control textarea" 
+                                  placeholder="Randevu ile ilgili notlarınız..."
+                                  maxlength="2000"></textarea>
+                    </div>
+                    
+                    <div style="display: flex; gap: 1rem;">
+                        <button type="button" class="btn btn-secondary" onclick="closeModals()">
+                            🔙 Vazgeç
+                        </button>
+                        <button type="submit" class="btn btn-success" style="flex: 1;">
+                            ✅ Randevuyu Onayla
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reddet Modal -->
+    <div id="rejectModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">❌ Randevu Reddet</h2>
+                <span class="close" onclick="closeModals()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="rejectInfo" style="background: #f8d7da; padding: 1rem; border-radius: 5px; margin-bottom: 1rem;">
+                    <!-- Randevu bilgileri buraya dinamik olarak yüklenecek -->
+                </div>
+                
+                <form id="rejectForm" method="post" style="display: inline;">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <div class="form-group">
+                        <label for="rejectReason" class="form-label">📝 Red Sebebi *</label>
+                        <textarea id="rejectReason" 
+                                  name="reason" 
+                                  class="form-control textarea" 
+                                  placeholder="Randevuyu neden reddediyorsunuz?"
+                                  required
+                                  maxlength="1000"></textarea>
+                        <small style="color: #6c757d;">Hastanın bilgilendirilmesi için red sebebinizi belirtin.</small>
+                    </div>
+                    
+                    <div style="display: flex; gap: 1rem;">
+                        <button type="button" class="btn btn-secondary" onclick="closeModals()">
+                            🔙 Vazgeç
+                        </button>
+                        <button type="submit" class="btn btn-danger" style="flex: 1;">
+                            ❌ Randevuyu Reddet
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Not Ekle Modal -->
+    <div id="notesModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">📝 Doktor Notu Ekle/Düzenle</h2>
+                <span class="close" onclick="closeModals()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="notesInfo" style="background: #f8f9fa; padding: 1rem; border-radius: 5px; margin-bottom: 1rem;">
+                    <!-- Randevu bilgileri buraya dinamik olarak yüklenecek -->
+                </div>
+                
+                <form id="notesForm" method="post" style="display: inline;">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <div class="form-group">
+                        <label for="doctorNotesText" class="form-label">📝 Doktor Notları *</label>
+                        <textarea id="doctorNotesText" 
+                                  name="notes" 
+                                  class="form-control textarea" 
+                                  placeholder="Muayene notları, teşhis, tedavi önerileri..."
+                                  required
+                                  maxlength="2000"
+                                  style="min-height: 120px;"></textarea>
+                        <small style="color: #6c757d;">Bu notlar hasta tarafından görülebilecektir.</small>
+                    </div>
+                    
+                    <div style="display: flex; gap: 1rem;">
+                        <button type="button" class="btn btn-secondary" onclick="closeModals()">
+                            🔙 Vazgeç
+                        </button>
+                        <button type="submit" class="btn btn-primary" style="flex: 1;">
+                            💾 Notu Kaydet
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 Randevu Sistemi. Tüm hakları saklıdır.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Onayla modal'ını göster (button elementini parametre olarak alır)
+        function showApproveModalFromButton(button) {
+            const randevuId = button.dataset.randevuId;
+            const hastaAdi = button.dataset.hastaAdi;
+            const tarih = button.dataset.randevuTarih;
+
+            document.getElementById('approveInfo').innerHTML = `
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div style="font-size: 2rem;">✅</div>
+                    <div>
+                        <h4 style="margin: 0; color: #155724;">Randevu Onaylanacak</h4>
+                        <div style="color: #155724; margin-top: 0.5rem;">
+                            <strong>Hasta:</strong> ${hastaAdi}<br>
+                            <strong>Tarih:</strong> ${tarih}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const form = document.getElementById('approveForm');
+            form.action = `/doktor/randevu/${randevuId}/onayla`;
+
+            document.getElementById('approveNotes').value = '';
+            document.getElementById('approveModal').style.display = 'block';
+        }
+
+        // Reddet modal'ını göster (button elementini parametre olarak alır)
+        function showRejectModalFromButton(button) {
+            const randevuId = button.dataset.randevuId;
+            const hastaAdi = button.dataset.hastaAdi;
+            const tarih = button.dataset.randevuTarih;
+
+            document.getElementById('rejectInfo').innerHTML = `
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div style="font-size: 2rem;">❌</div>
+                    <div>
+                        <h4 style="margin: 0; color: #721c24;">Randevu Reddedilecek</h4>
+                        <div style="color: #721c24; margin-top: 0.5rem;">
+                            <strong>Hasta:</strong> ${hastaAdi}<br>
+                            <strong>Tarih:</strong> ${tarih}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const form = document.getElementById('rejectForm');
+            form.action = `/doktor/randevu/${randevuId}/reddet`;
+
+            document.getElementById('rejectReason').value = '';
+            document.getElementById('rejectModal').style.display = 'block';
+        }
+
+        // Not modal'ını göster (button elementini parametre olarak alır)
+        function showNotesModalFromButton(button) {
+            const randevuId = button.dataset.randevuId;
+            const hastaAdi = button.dataset.hastaAdi;
+            const mevcutNot = button.dataset.mevcutNot;
+
+            document.getElementById('notesInfo').innerHTML = `
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div style="font-size: 2rem;">📝</div>
+                    <div>
+                        <h4 style="margin: 0; color: #495057;">Doktor Notu</h4>
+                        <div style="color: #6c757d; margin-top: 0.5rem;">
+                            <strong>Hasta:</strong> ${hastaAdi}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const form = document.getElementById('notesForm');
+            form.action = `/doktor/randevu/${randevuId}/not-ekle`;
+
+            document.getElementById('doctorNotesText').value = mevcutNot;
+            document.getElementById('notesModal').style.display = 'block';
+        }
+
+        // Modal'ları kapat
+        function closeModals() {
+            document.getElementById('approveModal').style.display = 'none';
+            document.getElementById('rejectModal').style.display = 'none';
+            document.getElementById('notesModal').style.display = 'none';
+        }
+
+        // Modal dışına tıklanırsa kapat
+        window.onclick = function(event) {
+            const modals = ['approveModal', 'rejectModal', 'notesModal'];
+            modals.forEach(modalId => {
+                const modal = document.getElementById(modalId);
+                if (event.target == modal) {
+                    closeModals();
+                }
+            });
+        }
+
+        // Tarih filtresi
+        function filterByDate(date) {
+            if (date) {
+                const currentUrl = new URL(window.location.href);
+                currentUrl.searchParams.set('date', date);
+                window.location.href = currentUrl.toString();
+            }
+        }
+
+        // Tarih filtresini temizle
+        function clearDateFilter() {
+            const currentUrl = new URL(window.location.href);
+            currentUrl.searchParams.delete('date');
+            window.location.href = currentUrl.toString();
+        }
+
+        // Toplu onaylama
+        function bulkApprove() {
+            const checkboxes = document.querySelectorAll('.randevu-checkbox:checked');
+            if (checkboxes.length === 0) {
+                alert('⚠️ Lütfen onaylamak istediğiniz randevuları seçin.');
+                return;
+            }
+
+            if (confirm(`🤔 ${checkboxes.length} randevuyu toplu olarak onaylamak istediğinizden emin misiniz?`)) {
+                // Toplu onaylama işlemi burada yapılacak
+                alert('📝 Toplu onaylama özelliği geliştirme aşamasındadır.');
+            }
+        }
+
+        // Randevuları dışa aktar
+        function exportAppointments() {
+            alert('📊 Dışa aktarma özelliği geliştirme aşamasındadır.');
+        }
+
+        // Program yazdır
+        function printSchedule() {
+            window.print();
+        }
+
+        // Tümünü seç/seçimi kaldır
+        function toggleAllCheckboxes() {
+            const checkboxes = document.querySelectorAll('.randevu-checkbox:not(:disabled)');
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+
+            checkboxes.forEach(cb => {
+                cb.checked = !allChecked;
+            });
+        }
+
+        // Sayfa yüklendiğinde
+        document.addEventListener('DOMContentLoaded', function() {
+            // Kartlara hover efekti
+            const randevuCards = document.querySelectorAll('.randevu-card');
+            randevuCards.forEach(card => {
+               card.addEventListener('mouseenter', function() {
+                   this.style.transform = 'translateX(5px)';
+                   this.style.boxShadow = '0 4px 15px rgba(0,0,0,0.1)';
+               });
+
+               card.addEventListener('mouseleave', function() {
+                   this.style.transform = 'translateX(0)';
+                   this.style.boxShadow = '';
+               });
+           });
+
+           // İstatistik kartlarına animasyon
+           const statCards = document.querySelectorAll('.stat-card');
+           statCards.forEach((card, index) => {
+               card.style.animation = `fadeIn 0.6s ease-out ${index * 0.1}s`;
+               card.style.opacity = '0';
+               card.style.animationFillMode = 'forwards';
+           });
+
+           // Toplu seçim için master checkbox ekle
+           const cardHeader = document.querySelector('.card-header h3');
+           if (cardHeader && document.querySelectorAll('.randevu-checkbox').length > 0) {
+               const masterCheckbox = document.createElement('input');
+               masterCheckbox.type = 'checkbox';
+               masterCheckbox.id = 'masterCheckbox';
+               masterCheckbox.style.marginLeft = '1rem';
+               masterCheckbox.addEventListener('change', toggleAllCheckboxes);
+
+               const label = document.createElement('label');
+               label.htmlFor = 'masterCheckbox';
+               label.textContent = ' Tümünü Seç';
+               label.style.fontSize = '0.9rem';
+               label.style.fontWeight = 'normal';
+
+               cardHeader.appendChild(masterCheckbox);
+               cardHeader.appendChild(label);
+           }
+       });
+
+       // Form validasyonları
+       document.getElementById('rejectForm').addEventListener('submit', function(e) {
+           const reason = document.getElementById('rejectReason').value.trim();
+
+           if (!reason) {
+               e.preventDefault();
+               alert('⚠️ Lütfen red sebebini belirtin.');
+               document.getElementById('rejectReason').focus();
+               return;
+           }
+
+           if (reason.length < 10) {
+               e.preventDefault();
+               alert('⚠️ Red sebebi en az 10 karakter olmalıdır.');
+               document.getElementById('rejectReason').focus();
+               return;
+           }
+
+           if (!confirm('🤔 Randevuyu reddetmek istediğinizden emin misiniz?')) {
+               e.preventDefault();
+               return;
+           }
+       });
+
+       document.getElementById('approveForm').addEventListener('submit', function(e) {
+           if (!confirm('✅ Randevuyu onaylamak istediğinizden emin misiniz?')) {
+               e.preventDefault();
+               return;
+           }
+       });
+
+       document.getElementById('notesForm').addEventListener('submit', function(e) {
+           const notes = document.getElementById('doctorNotesText').value.trim();
+
+           if (!notes) {
+               e.preventDefault();
+               alert('⚠️ Lütfen doktor notunu girin.');
+               document.getElementById('doctorNotesText').focus();
+               return;
+           }
+
+           if (notes.length < 5) {
+               e.preventDefault();
+               alert('⚠️ Doktor notu en az 5 karakter olmalıdır.');
+               document.getElementById('doctorNotesText').focus();
+               return;
+           }
+       });
+
+       // Keyboard shortcuts
+       document.addEventListener('keydown', function(e) {
+           // ESC tuşu ile modal'ları kapat
+           if (e.key === 'Escape') {
+               closeModals();
+           }
+       });
+   </script>
+
+   <style>
+       .randevu-card {
+           transition: all 0.3s ease;
+           cursor: pointer;
+       }
+       
+       .randevu-card:hover {
+           background-color: #f8f9fa;
+       }
+       
+       .randevu-patient {
+           font-weight: 600;
+           color: #28a745;
+       }
+       
+       .randevu-checkbox {
+           margin-right: 0.5rem;
+           transform: scale(1.2);
+       }
+       
+       @keyframes fadeIn {
+           from {
+               opacity: 0;
+               transform: translateY(20px);
+           }
+           to {
+               opacity: 1;
+               transform: translateY(0);
+           }
+       }
+
+       @media (max-width: 768px) {
+           .col-8, .col-4 {
+               flex: 0 0 100%;
+               max-width: 100%;
+           }
+           
+           .dashboard-stats {
+               grid-template-columns: repeat(2, 1fr) !important;
+           }
+           
+           .randevu-header {
+               flex-direction: column;
+               align-items: flex-start;
+               gap: 1rem;
+           }
+           
+           .modal-content {
+               width: 95%;
+               margin: 10% auto;
+           }
+           
+           .btn {
+               margin-bottom: 0.5rem;
+           }
+       }
+
+       /* Yazdırma stilleri */
+       @media print {
+           .header, .footer, .btn, .alert, .modal { display: none !important; }
+           .card { border: 1px solid #ccc; margin-bottom: 1rem; }
+           .randevu-card { break-inside: avoid; page-break-inside: avoid; }
+           .badge { border: 1px solid #333; padding: 2px 5px; }
+           body { font-size: 12px; }
+       }
+   </style>
+</body>
+</html>

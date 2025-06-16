@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hasta Dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <nav class="nav">
+                <a th:href="@{/hasta/dashboard}" class="nav-brand">🏥 Randevu Sistemi</a>
+                <ul class="nav-links">
+                    <li><a th:href="@{/hasta/dashboard}" class="text-warning">Dashboard</a></li>
+                    <li><a th:href="@{/hasta/randevu-al}">Randevu Al</a></li>
+                    <li><a th:href="@{/hasta/randevularim}">Randevularım</a></li>
+                    <li><a th:href="@{/hasta/profil}">Profilim</a></li>
+                    <li>
+                        <form th:action="@{/logout}" method="post" style="display: inline;">
+                            <button type="submit" class="nav-link" style="background: none; border: none; color: inherit; cursor: pointer; padding: 0;">
+                                Çıkış
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Ana İçerik -->
+    <main class="container" style="padding: 2rem 0;">
+        <!-- Sayfa Başlığı -->
+        <div class="mb-4">
+            <h1 style="color: #333; margin-bottom: 0.5rem;">
+                👋 Hoş Geldiniz, <span th:text="${username}">Kullanıcı</span>!
+            </h1>
+            <p style="color: #6c757d; font-size: 1.1rem; margin: 0;">
+                Hasta panelinize hoş geldiniz. Buradan randevularınızı yönetebilir ve sağlık hizmetlerimize erişebilirsiniz.
+            </p>
+        </div>
+
+        <!-- Alert Mesajları -->
+        <div th:if="${success}" class="alert alert-success">
+            <strong>✅ Başarılı:</strong> <span th:text="${success}">Başarı mesajı</span>
+        </div>
+        
+        <div th:if="${error}" class="alert alert-danger">
+            <strong>❌ Hata:</strong> <span th:text="${error}">Hata mesajı</span>
+        </div>
+
+        <!-- Randevu Formu (Main Dashboard Functionality) -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h2 style="color: #333; margin-bottom: 1.5rem;">📅 Yeni Randevu Oluştur</h2>
+                <form th:action="@{/hasta/randevu-al}" method="post" id="randevuForm">
+                    <!-- Filters -->
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="uzmanlik" class="form-label">👨‍⚕️ Uzmanlık Alanı</label>
+                                <select class="form-select" id="uzmanlik" name="uzmanlik">
+                                    <option value="">Tümü</option>
+                                    <option th:each="uzmanlik : ${uzmanlikAlanlari}"
+                                            th:value="${uzmanlik}"
+                                            th:text="${uzmanlik}">Uzmanlık Alanı</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="hastane" class="form-label">🏥 Hastane</label>
+                                <select class="form-select" id="hastane" name="hastane">
+                                    <option value="">Tümü</option>
+                                    <option th:each="hastane : ${hastaneler}"
+                                            th:value="${hastane}"
+                                            th:text="${hastane}">Hastane</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="sehir" class="form-label">🌍 Şehir</label>
+                                <select class="form-select" id="sehir" name="sehir">
+                                    <option value="">Tümü</option>
+                                    <option value="istanbul">İstanbul</option>
+                                    <option value="ankara">Ankara</option>
+                                    <option value="izmir">İzmir</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Doktor List -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label for="doktor" class="form-label">👨‍⚕️ Doktor Seçin</label>
+                                <select class="form-select" id="doktor" name="doktorId" required>
+                                    <option value="">Doktor seçin...</option>
+                                    <option th:each="doktor : ${doktorlar}"
+                                            th:value="${doktor.id}"
+                                            th:text="${doktor.fullName + ' - ' + doktor.specialization + ' (' + doktor.hospital + ')'}">
+                                        Doktor Adı - Uzmanlık (Hastane)
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Date and Time -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="tarih" class="form-label">📅 Tarih</label>
+                                <input type="date" 
+                                       class="form-control" 
+                                       id="tarih" 
+                                       name="appointmentDate" 
+                                       required
+                                       th:min="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="saat" class="form-label">⏰ Saat</label>
+                                <select class="form-select" id="saat" name="appointmentTime" required>
+                                    <option value="">Saat seçin...</option>
+                                    <!-- Saatler AJAX ile yüklenecek -->
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Complaint -->
+                    <div class="form-group mb-4">
+                        <label for="sikayet" class="form-label">💬 Şikayetiniz</label>
+                        <textarea class="form-control" 
+                                  id="sikayet" 
+                                  name="complaint" 
+                                  rows="4" 
+                                  required
+                                  placeholder="Lütfen şikayetinizi detaylı bir şekilde açıklayın..."></textarea>
+                        <small class="form-text text-muted">
+                            Doktorunuzun size daha iyi yardımcı olabilmesi için şikayetinizi detaylı bir şekilde açıklayın.
+                        </small>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            ✅ Randevu Al
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Yaklaşan Randevular -->
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-calendar-alt me-2"></i>Yaklaşan Randevular
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center text-muted">
+                            <p>Henüz yaklaşan randevunuz bulunmamaktadır.</p>
+                            <a th:href="@{/hasta/randevularim}" class="btn btn-primary">
+                                <i class="fas fa-list me-2"></i>Randevularımı Görüntüle
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hızlı İşlemler -->
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-bolt me-2"></i>Hızlı İşlemler
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a th:href="@{/hasta/randevu-al}" class="btn btn-outline-primary">
+                                <i class="fas fa-calendar-plus me-2"></i>Yeni Randevu Al
+                            </a>
+                            <a th:href="@{/hasta/randevularim}" class="btn btn-outline-info">
+                                <i class="fas fa-list me-2"></i>Randevularımı Görüntüle
+                            </a>
+                            <a th:href="@{/hasta/profil}" class="btn btn-outline-secondary">
+                                <i class="fas fa-user-edit me-2"></i>Profilimi Düzenle
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 Randevu Sistemi. Tüm hakları saklıdır.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script th:inline="javascript">
+        // Doktor filtreleme
+        function filterDoctors() {
+            const uzmanlik = document.getElementById('uzmanlik').value;
+            const hastane = document.getElementById('hastane').value;
+            const sehir = document.getElementById('sehir').value;
+            
+            // AJAX isteği
+            fetch(`/hasta/doktor-filtrele?uzmanlik=${uzmanlik}&hastane=${hastane}&sehir=${sehir}`)
+                .then(response => response.json())
+                .then(data => {
+                    const doktorSelect = document.getElementById('doktor');
+                    doktorSelect.innerHTML = '<option value="">Doktor seçin...</option>';
+                    
+                    data.forEach(doktor => {
+                        const option = document.createElement('option');
+                        option.value = doktor.id;
+                        option.textContent = `${doktor.fullName} - ${doktor.specialization} (${doktor.hospital})`;
+                        doktorSelect.appendChild(option);
+                    });
+                });
+        }
+
+        // Müsait saatleri getir
+        function getAvailableSlots() {
+            const doktorId = document.getElementById('doktor').value;
+            const tarih = document.getElementById('tarih').value;
+            
+            console.log('Doktor ID:', doktorId);
+            console.log('Tarih:', tarih);
+
+            if (!doktorId || !tarih) {
+                console.log('Doktor ID veya Tarih boş, AJAX çağrısı yapılmıyor.');
+                return;
+            }
+            
+            // AJAX isteği
+            fetch(`/hasta/musait-saatler?doktorId=${doktorId}&date=${tarih}`)
+                .then(response => {
+                    console.log('API Yanıtı:', response);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Gelen Saat Verileri:', data);
+                    const saatSelect = document.getElementById('saat');
+                    saatSelect.innerHTML = '<option value="">Saat seçin...</option>';
+                    
+                    if (data.length === 0) {
+                        const option = document.createElement('option');
+                        option.value = "";
+                        option.textContent = "Bu tarihte müsait saat yok.";
+                        saatSelect.appendChild(option);
+                    } else {
+                        data.forEach(saat => {
+                            const option = document.createElement('option');
+                            option.value = saat;
+                            option.textContent = saat;
+                            saatSelect.appendChild(option);
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Müsait saatler getirilirken hata oluştu:', error);
+                    const saatSelect = document.getElementById('saat');
+                    saatSelect.innerHTML = '<option value="">Saatler yüklenemedi.</option>';
+                });
+        }
+
+        // Event Listeners
+        document.getElementById('uzmanlik').addEventListener('change', filterDoctors);
+        document.getElementById('hastane').addEventListener('change', filterDoctors);
+        document.getElementById('sehir').addEventListener('change', filterDoctors);
+        document.getElementById('doktor').addEventListener('change', getAvailableSlots);
+        document.getElementById('tarih').addEventListener('change', getAvailableSlots);
+
+        // Form validasyonu
+        document.getElementById('randevuForm').addEventListener('submit', function(e) {
+            const doktor = document.getElementById('doktor').value;
+            const tarih = document.getElementById('tarih').value;
+            const saat = document.getElementById('saat').value;
+            // You can add more comprehensive validation here if needed
+            // For example, preventing submission if fields are empty
+            if (!doktor || !tarih || !saat) {
+                alert('Lütfen tüm alanları doldurun.');
+                e.preventDefault(); // Prevent form submission
+            }
+        });
+    </script>
+</body>
+</html> 

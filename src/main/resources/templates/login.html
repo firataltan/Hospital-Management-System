@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title} ?: 'Giriş Yap - Randevu Sistemi'">Giriş Yap - Randevu Sistemi</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <nav class="nav">
+                <a th:href="@{/}" class="nav-brand">🏥 Randevu Sistemi</a>
+                <ul class="nav-links">
+                    <li><a th:href="@{/}">Ana Sayfa</a></li>
+                    <li><a th:href="@{/login}" class="text-warning">Giriş Yap</a></li>
+                    <li><a th:href="@{/register}">Kayıt Ol</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Ana İçerik -->
+    <main class="container" style="padding: 3rem 0;">
+        <div class="row">
+            <div class="col-6" style="margin: 0 auto;">
+                <div class="card fade-in">
+                    <div class="card-header text-center">
+                        <h2 style="margin: 0; color: #333;">
+                            <span style="font-size: 2rem;">🔐</span><br>
+                            Sisteme Giriş Yapın
+                        </h2>
+                        <p style="margin: 0.5rem 0 0; color: #6c757d;">
+                            Hesabınıza erişmek için bilgilerinizi girin
+                        </p>
+                    </div>
+                    <div class="card-body">
+                        <!-- Hata Mesajları -->
+                        <div th:if="${error}" class="alert alert-danger">
+                            <strong>❌ Hata:</strong> <span th:text="${error}">Hata mesajı</span>
+                        </div>
+                        
+                        <!-- Başarı Mesajları -->
+                        <div th:if="${message}" class="alert alert-success">
+                            <strong>✅ Bilgi:</strong> <span th:text="${message}">Bilgi mesajı</span>
+                        </div>
+
+                        <!-- Login Formu -->
+                        <form th:action="@{/perform_login}" method="post" id="loginForm">
+                            <!-- Kullanıcı Adı -->
+                            <div class="form-group">
+                                <label for="username" class="form-label">
+                                    👤 Kullanıcı Adı
+                                </label>
+                                <input type="text" 
+                                       id="username" 
+                                       name="username" 
+                                       class="form-control" 
+                                       placeholder="Kullanıcı adınızı girin"
+                                       required
+                                       autocomplete="username">
+                            </div>
+
+                            <!-- Şifre -->
+                            <div class="form-group">
+                                <label for="password" class="form-label">
+                                    🔒 Şifre
+                                </label>
+                                <div style="position: relative;">
+                                    <input type="password" 
+                                           id="password" 
+                                           name="password" 
+                                           class="form-control" 
+                                           placeholder="Şifrenizi girin"
+                                           required
+                                           autocomplete="current-password">
+                                    <button type="button" 
+                                            id="togglePassword" 
+                                            style="position: absolute; right: 10px; top: 50%; 
+                                                   transform: translateY(-50%); background: none; 
+                                                   border: none; cursor: pointer; color: #6c757d;">
+                                        👁️
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Beni Hatırla -->
+                            <div class="form-group">
+                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                    <input type="checkbox" name="remember-me" id="rememberMe">
+                                    <span>Beni hatırla (7 gün)</span>
+                                </label>
+                            </div>
+
+                            <!-- Giriş Butonu -->
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-primary w-100 btn-lg">
+                                    🚀 Giriş Yap
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="card-footer text-center">
+                        <p style="margin: 0; color: #6c757d;">
+                            Henüz hesabınız yok mu? 
+                            <a th:href="@{/register}" style="color: #007bff; text-decoration: none; font-weight: 600;">
+                                Kayıt Olun
+                            </a>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Demo Hesaplar -->
+                <div class="card mt-4">
+                    <div class="card-header text-center">
+                        <h3 style="margin: 0; color: #333;">
+                            🎯 Demo Hesaplar
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-6">
+                                <div style="text-align: center; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+                                    <h4 style="color: #007bff; margin-bottom: 1rem;">👨‍⚕️ Doktor</h4>
+                                    <p style="margin: 0.25rem 0;"><strong>Kullanıcı Adı:</strong> doktor1</p>
+                                    <p style="margin: 0.25rem 0;"><strong>Şifre:</strong> 123456</p>
+                                    <button type="button" 
+                                            class="btn btn-sm btn-primary mt-2"
+                                            onclick="fillDemo('doktor1', '123456')">
+                                        Bilgileri Doldur
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div style="text-align: center; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+                                    <h4 style="color: #28a745; margin-bottom: 1rem;">🏥 Hasta</h4>
+                                    <p style="margin: 0.25rem 0;"><strong>Kullanıcı Adı:</strong> hasta1</p>
+                                    <p style="margin: 0.25rem 0;"><strong>Şifre:</strong> 123456</p>
+                                    <button type="button" 
+                                            class="btn btn-sm btn-success mt-2"
+                                            onclick="fillDemo('hasta1', '123456')">
+                                        Bilgileri Doldur
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 Randevu Sistemi. Tüm hakları saklıdır.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Şifre göster/gizle
+        document.getElementById('togglePassword').addEventListener('click', function() {
+            const passwordField = document.getElementById('password');
+            const button = this;
+            
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                button.textContent = '🙈';
+            } else {
+                passwordField.type = 'password';
+                button.textContent = '👁️';
+            }
+        });
+
+        // Demo hesap bilgilerini doldur
+        function fillDemo(username, password) {
+            document.getElementById('username').value = username;
+            document.getElementById('password').value = password;
+            
+            // Görsel geri bildirim
+            const usernameField = document.getElementById('username');
+            const passwordField = document.getElementById('password');
+            
+            usernameField.style.background = '#d4edda';
+            passwordField.style.background = '#d4edda';
+            
+            setTimeout(() => {
+                usernameField.style.background = '';
+                passwordField.style.background = '';
+            }, 1000);
+        }
+
+        // Form validasyonu
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            
+            if (!username) {
+                e.preventDefault();
+                alert('⚠️ Lütfen kullanıcı adınızı girin.');
+                document.getElementById('username').focus();
+                return;
+            }
+            
+            if (!password) {
+                e.preventDefault();
+                alert('⚠️ Lütfen şifrenizi girin.');
+                document.getElementById('password').focus();
+                return;
+            }
+            
+            if (password.length < 6) {
+                e.preventDefault();
+                alert('⚠️ Şifre en az 6 karakter olmalıdır.');
+                document.getElementById('password').focus();
+                return;
+            }
+        });
+
+        // Sayfa yüklendiğinde username alanına focus
+        window.addEventListener('load', function() {
+            document.getElementById('username').focus();
+        });
+    </script>
+</body>
+</html> 

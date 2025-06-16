@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title} ?: 'Randevu Sistemi'">Randevu Sistemi</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <nav class="nav">
+                <a th:href="@{/}" class="nav-brand">🏥 Randevu Sistemi</a>
+                <ul class="nav-links">
+                    <li><a th:href="@{/}">Ana Sayfa</a></li>
+                    <li><a th:href="@{/login}">Giriş Yap</a></li>
+                    <li><a th:href="@{/register}">Kayıt Ol</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Ana İçerik -->
+    <main class="container">
+        <!-- Hero Section -->
+        <section class="hero" style="text-align: center; padding: 4rem 0;">
+            <h1 style="font-size: 3rem; margin-bottom: 1rem; color: #333;">
+                Randevu ve Hasta Takip Sistemi
+            </h1>
+            <p style="font-size: 1.25rem; color: #6c757d; margin-bottom: 2rem;">
+                Sağlık hizmetlerinde dijital dönüşüm için modern ve güvenilir platform
+            </p>
+            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                <a th:href="@{/register}" class="btn btn-primary btn-lg">Hasta Olarak Kayıt Ol</a>
+                <a th:href="@{/register}" class="btn btn-secondary btn-lg">Doktor Olarak Kayıt Ol</a>
+            </div>
+        </section>
+
+        <!-- Özellikler -->
+        <section style="padding: 4rem 0;">
+            <h2 style="text-align: center; margin-bottom: 3rem; color: #333;">
+                Sistem Özellikleri
+            </h2>
+            <div class="row">
+                <div class="col-4">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">👨‍⚕️</div>
+                            <h3 class="card-title">Doktor Paneli</h3>
+                            <p>Randevuları yönetin, hasta notları ekleyin, çalışma saatlerinizi düzenleyin</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">🏥</div>
+                            <h3 class="card-title">Hasta Takibi</h3>
+                            <p>Randevu alın, geçmiş muayenelerinizi görüntüleyin, doktor notlarına erişin</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">📅</div>
+                            <h3 class="card-title">Akıllı Randevu</h3>
+                            <p>Çakışma kontrolü, otomatik onay sistemi, esnek randevu yönetimi</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- İstatistikler -->
+        <section style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                        color: white; padding: 4rem 2rem; border-radius: 15px; margin: 2rem 0;">
+            <h2 style="text-align: center; margin-bottom: 3rem;">Sistem İstatistikleri</h2>
+            <div class="dashboard-stats">
+                <div class="stat-card" style="background: rgba(255,255,255,0.1);">
+                    <div class="stat-number">500+</div>
+                    <div class="stat-label">Kayıtlı Hasta</div>
+                </div>
+                <div class="stat-card" style="background: rgba(255,255,255,0.1);">
+                    <div class="stat-number">50+</div>
+                    <div class="stat-label">Uzman Doktor</div>
+                </div>
+                <div class="stat-card" style="background: rgba(255,255,255,0.1);">
+                    <div class="stat-number">1000+</div>
+                    <div class="stat-label">Başarılı Randevu</div>
+                </div>
+                <div class="stat-card" style="background: rgba(255,255,255,0.1);">
+                    <div class="stat-number">%98</div>
+                    <div class="stat-label">Memnuniyet Oranı</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Nasıl Çalışır -->
+        <section style="padding: 4rem 0;">
+            <h2 style="text-align: center; margin-bottom: 3rem; color: #333;">
+                Nasıl Çalışır?
+            </h2>
+            <div class="row">
+                <div class="col-3">
+                    <div style="text-align: center;">
+                        <div style="width: 80px; height: 80px; background: #007bff; 
+                                    border-radius: 50%; display: flex; align-items: center; 
+                                    justify-content: center; margin: 0 auto 1rem; color: white; 
+                                    font-size: 2rem; font-weight: bold;">1</div>
+                        <h4>Kayıt Olun</h4>
+                        <p>Hasta veya doktor olarak sisteme kayıt olun</p>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div style="text-align: center;">
+                        <div style="width: 80px; height: 80px; background: #28a745; 
+                                    border-radius: 50%; display: flex; align-items: center; 
+                                    justify-content: center; margin: 0 auto 1rem; color: white; 
+                                    font-size: 2rem; font-weight: bold;">2</div>
+                        <h4>Giriş Yapın</h4>
+                        <p>Kullanıcı adı ve şifreniz ile sisteme giriş yapın</p>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div style="text-align: center;">
+                        <div style="width: 80px; height: 80px; background: #ffc107; 
+                                    border-radius: 50%; display: flex; align-items: center; 
+                                    justify-content: center; margin: 0 auto 1rem; color: white; 
+                                    font-size: 2rem; font-weight: bold;">3</div>
+                        <h4>Randevu Alın</h4>
+                        <p>Uygun doktor ve saati seçerek randevu alın</p>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div style="text-align: center;">
+                        <div style="width: 80px; height: 80px; background: #dc3545; 
+                                    border-radius: 50%; display: flex; align-items: center; 
+                                    justify-content: center; margin: 0 auto 1rem; color: white; 
+                                    font-size: 2rem; font-weight: bold;">4</div>
+                        <h4>Takip Edin</h4>
+                        <p>Randevu durumunuzu ve doktor notlarını takip edin</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 Randevu Sistemi. Tüm hakları saklıdır.</p>
+            <p>Modern sağlık hizmetleri için geliştirilmiştir.</p>
+        </div>
+    </footer>
+</body>
+</html> 

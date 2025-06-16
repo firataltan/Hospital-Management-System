@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title} ?: 'Doktor Profili'">Doktor Profili</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <nav class="nav">
+                <a th:href="@{/doktor/dashboard}" class="nav-brand">🏥 Randevu Sistemi</a>
+                <ul class="nav-links">
+                    <li><a th:href="@{/doktor/dashboard}">Dashboard</a></li>
+                    <li><a th:href="@{/doktor/randevular}">Randevular</a></li>
+                    <li><a th:href="@{/doktor/profil}" class="text-warning">Profilim</a></li>
+                    <li><a th:href="@{/doktor/calisma-saatleri}">Çalışma Saatleri</a></li>
+                    <li>
+                        <form th:action="@{/logout}" method="post" style="display: inline;">
+                            <button type="submit" class="nav-link" style="background: none; border: none; color: inherit; cursor: pointer; padding: 0;">
+                                Çıkış
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Ana İçerik -->
+    <main class="container" style="padding: 2rem 0;">
+        <!-- Sayfa Başlığı -->
+        <div class="mb-4">
+            <h1 style="color: #333; margin-bottom: 0.5rem;">
+                👨‍⚕️ Doktor Profili
+            </h1>
+            <p style="color: #6c757d; font-size: 1.1rem; margin: 0;">
+                Profil bilgilerinizi görüntüleyin ve güncelleyin
+            </p>
+        </div>
+
+        <!-- Alert Mesajları -->
+        <div th:if="${success}" class="alert alert-success">
+            <strong>✅ Başarılı:</strong> <span th:text="${success}">Başarı mesajı</span>
+        </div>
+        
+        <div th:if="${error}" class="alert alert-danger">
+            <strong>❌ Hata:</strong> <span th:text="${error}">Hata mesajı</span>
+        </div>
+
+        <div class="row">
+            <!-- Sol Kolon - Profil Formu -->
+            <div class="col-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 style="margin: 0; color: #333;">
+                            ✏️ Profil Bilgileri
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/doktor/profil}" method="post" th:object="${doktor}" id="profileForm">
+                            <div class="row">
+                                <!-- Sol Alt Kolon -->
+                                <div class="col-6">
+                                    <!-- Ad -->
+                                    <div class="form-group">
+                                        <label for="firstName" class="form-label">📝 Ad *</label>
+                                        <input type="text" 
+                                               id="firstName" 
+                                               th:field="*{firstName}"
+                                               class="form-control" 
+                                               placeholder="Adınızı girin"
+                                               required
+                                               maxlength="50">
+                                    </div>
+
+                                    <!-- Soyad -->
+                                    <div class="form-group">
+                                        <label for="lastName" class="form-label">📝 Soyad *</label>
+                                        <input type="text" 
+                                               id="lastName" 
+                                               th:field="*{lastName}"
+                                               class="form-control" 
+                                               placeholder="Soyadınızı girin"
+                                               required
+                                               maxlength="50">
+                                    </div>
+
+                                    <!-- Email -->
+                                    <div class="form-group">
+                                        <label for="email" class="form-label">📧 Email *</label>
+                                        <input type="email" 
+                                               id="email" 
+                                               th:field="*{email}"
+                                               class="form-control" 
+                                               placeholder="email@ornek.com"
+                                               required
+                                               maxlength="100">
+                                    </div>
+
+                                    <!-- Telefon -->
+                                    <div class="form-group">
+                                        <label for="phone" class="form-label">📞 Telefon</label>
+                                        <input type="tel" 
+                                               id="phone" 
+                                               th:field="*{phone}"
+                                               class="form-control" 
+                                               placeholder="0555 123 45 67"
+                                               maxlength="15">
+                                    </div>
+
+                                    <!-- Uzmanlık Alanı -->
+                                    <div class="form-group">
+                                        <label for="specialization" class="form-label">🩺 Uzmanlık Alanı *</label>
+                                        <select id="specialization" th:field="*{specialization}" class="form-control form-select" required>
+                                            <option value="">Seçiniz</option>
+                                            <option value="Kardiyoloji">Kardiyoloji</option>
+                                            <option value="Nöroloji">Nöroloji</option>
+                                            <option value="Ortopedi">Ortopedi</option>
+                                            <option value="Göğüs Hastalıkları">Göğüs Hastalıkları</option>
+                                            <option value="Dahiliye">Dahiliye</option>
+                                            <option value="Üroloji">Üroloji</option>
+                                            <option value="Kadın Doğum">Kadın Doğum</option>
+                                            <option value="Çocuk Sağlığı">Çocuk Sağlığı</option>
+                                            <option value="Göz Hastalıkları">Göz Hastalıkları</option>
+                                            <option value="Kulak Burun Boğaz">Kulak Burun Boğaz</option>
+                                            <option value="Cildiye">Cildiye</option>
+                                            <option value="Psikiyatri">Psikiyatri</option>
+                                            <option value="Diğer">Diğer</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Sağ Alt Kolon -->
+                                <div class="col-6">
+                                    <!-- Hastane -->
+                                    <div class="form-group">
+                                        <label for="hospital" class="form-label">🏥 Hastane/Klinik</label>
+                                        <input type="text" 
+                                               id="hospital" 
+                                               th:field="*{hospital}"
+                                               class="form-control" 
+                                               placeholder="Çalıştığınız hastane"
+                                               maxlength="200">
+                                    </div>
+
+                                    <!-- Deneyim Yılı -->
+                                    <div class="form-group">
+                                        <label for="experienceYears" class="form-label">📅 Deneyim (Yıl)</label>
+                                        <input type="number" 
+                                               id="experienceYears" 
+                                               th:field="*{experienceYears}"
+                                               class="form-control" 
+                                               placeholder="5"
+                                               min="0"
+                                               max="50">
+                                    </div>
+
+                                    <!-- Randevu Ücreti -->
+                                    <div class="form-group">
+                                        <label for="consultationFee" class="form-label">💰 Randevu Ücreti (TL)</label>
+                                        <input type="number" 
+                                               id="consultationFee" 
+                                               th:field="*{consultationFee}"
+                                               class="form-control" 
+                                               placeholder="200"
+                                               min="0"
+                                               step="0.01">
+                                    </div>
+
+                                    <!-- Diploma Numarası (Readonly) -->
+                                    <div class="form-group">
+                                        <label for="diplomaNo" class="form-label">🎓 Diploma Numarası</label>
+                                        <input type="text" 
+                                               id="diplomaNo" 
+                                               th:value="${doktor.diplomaNo}"
+                                               class="form-control" 
+                                               readonly
+                                               style="background-color: #f8f9fa;">
+                                        <small style="color: #6c757d;">Diploma numarası değiştirilemez.</small>
+                                    </div>
+
+                                    <!-- Kullanıcı Adı (Readonly) -->
+                                    <div class="form-group">
+                                        <label for="username" class="form-label">👤 Kullanıcı Adı</label>
+                                        <input type="text" 
+                                               id="username" 
+                                               th:value="${doktor.username}"
+                                               class="form-control" 
+                                               readonly
+                                               style="background-color: #f8f9fa;">
+                                        <small style="color: #6c757d;">Kullanıcı adı değiştirilemez.</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Muayenehane Adresi -->
+                            <div class="form-group">
+                                <label for="clinicAddress" class="form-label">🏢 Muayenehane Adresi</label>
+                                <textarea id="clinicAddress" 
+                                          th:field="*{clinicAddress}"
+                                          class="form-control textarea" 
+                                          placeholder="Muayenehane adresinizi girin"
+                                          maxlength="500"></textarea>
+                            </div>
+
+                            <!-- Hakkında -->
+                            <div class="form-group">
+                                <label for="about" class="form-label">📋 Hakkınızda</label>
+                                <textarea id="about" 
+                                          th:field="*{about}"
+                                          class="form-control textarea" 
+                                          placeholder="Kendiniz ve uzmanlığınız hakkında bilgi"
+                                          maxlength="1000"
+                                          style="min-height: 120px;"></textarea>
+                                <small style="color: #6c757d;">Bu bilgiler hastalara gösterilecektir.</small>
+                            </div>
+
+                            <!-- Güncelle Butonu -->
+                            <div class="form-group text-center">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    💾 Profili Güncelle
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sağ Kolon - Profil Özeti ve İşlemler -->
+            <div class="col-4">
+                <!-- Profil Özeti -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h3 style="margin: 0; color: #333;">
+                            👨‍⚕️ Profil Özeti
+                        </h3>
+                    </div>
+                    <div class="card-body text-center">
+                        <!-- Avatar -->
+                        <div style="width: 100px; height: 100px; border-radius: 50%; 
+                                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                                    display: flex; align-items: center; justify-content: center;
+                                    font-size: 2.5rem; color: white; margin: 0 auto 1rem;"
+                             th:text="${doktor.firstName.substring(0,1).toUpperCase() + doktor.lastName.substring(0,1).toUpperCase()}">
+                            AY
+                        </div>
+                        
+                        <h4 style="margin-bottom: 0.5rem;" th:text="${doktor.doctorTitle}">
+                            Dr. Ahmet Yılmaz
+                        </h4>
+                        
+                        <p style="color: #007bff; font-weight: 600; margin-bottom: 1rem;" th:text="${doktor.specialization}">
+                            Kardiyoloji
+                        </p>
+                        
+                        <!-- Durum Badge -->
+                        <div style="margin-bottom: 1rem;">
+                            <span class="badge" 
+                                  th:classappend="${doktor.acceptingAppointments ? 'badge-success' : 'badge-warning'}"
+                                  th:text="${doktor.acceptingAppointments ? '✅ Aktif' : '⏸️ Pasif'}">
+                                ✅ Aktif
+                            </span>
+                        </div>
+                        
+                        <!-- Özet Bilgiler -->
+                        <div style="text-align: left; font-size: 0.9rem; background: #f8f9fa; padding: 1rem; border-radius: 8px;">
+                            <div style="margin-bottom: 0.5rem;">
+                                <strong>📧 Email:</strong><br>
+                                <span th:text="${doktor.email}">email@ornek.com</span>
+                            </div>
+                            <div style="margin-bottom: 0.5rem;" th:if="${doktor.phone}">
+                                <strong>📞 Telefon:</strong><br>
+                                <span th:text="${doktor.phone}">0555 123 45 67</span>
+                            </div>
+                            <div style="margin-bottom: 0.5rem;" th:if="${doktor.hospital}">
+                                <strong>🏥 Hastane:</strong><br>
+                                <span th:text="${doktor.hospital}">Atatürk Hastanesi</span>
+                            </div>
+                            <div style="margin-bottom: 0.5rem;" th:if="${doktor.experienceYears}">
+                                <strong>📅 Deneyim:</strong><br>
+                                <span th:text="${doktor.experienceYears + ' yıl'}">5 yıl</span>
+                            </div>
+                            <div th:if="${doktor.consultationFee}">
+                                <strong>💰 Ücret:</strong><br>
+                                <span th:text="${doktor.consultationFee + ' TL'}">200 TL</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hızlı İşlemler -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h3 style="margin: 0; color: #333;">
+                            ⚡ Hızlı İşlemler
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <a th:href="@{/doktor/sifre-degistir}" class="btn btn-warning w-100 mb-2">
+                            🔒 Şifre Değiştir
+                        </a>
+                        <a th:href="@{/doktor/calisma-saatleri}" class="btn btn-info w-100 mb-2">
+                            ⏰ Çalışma Saatleri
+                        </a>
+                        <a th:href="@{/doktor/dashboard}" class="btn btn-primary w-100 mb-2">
+                            📊 Dashboard'a Dön
+                        </a>
+                        <button type="button" class="btn btn-secondary w-100" onclick="previewProfile()">
+                            👁️ Profil Önizleme
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Profil Tamamlanma Durumu -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 style="margin: 0; color: #333;">
+                            📊 Profil Tamamlanma
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div id="profileCompleteness">
+                            <!-- JavaScript ile doldurulacak -->
+                        </div>
+                        
+                        <div style="margin-top: 1rem;">
+                            <div class="progress-bar">
+                                <div id="progressFill" class="progress-fill"></div>
+                            </div>
+                            <div style="text-align: center; margin-top: 0.5rem; font-weight: 600;" id="progressText">
+                                0% Tamamlandı
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 1rem; font-size: 0.9rem; color: #6c757d;">
+                            <div style="margin-bottom: 0.5rem;">
+                                💡 <strong>İpucu:</strong> Profil bilgilerinizi eksiksiz doldurarak hastalardan daha fazla randevu alabilirsiniz.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Profil Önizleme Modal -->
+    <div id="previewModal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2 class="modal-title">👁️ Profil Önizleme</h2>
+                <span class="close" onclick="closePreviewModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="profilePreview">
+                    <!-- Profil önizlemesi buraya yüklenecek -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 Randevu Sistemi. Tüm hakları saklıdır.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Profil tamamlanma durumunu hesapla
+        function calculateProfileCompleteness() {
+            const fields = {
+                'firstName': document.getElementById('firstName').value.trim(),
+                'lastName': document.getElementById('lastName').value.trim(),
+                'email': document.getElementById('email').value.trim(),
+                'phone': document.getElementById('phone').value.trim(),
+                'specialization': document.getElementById('specialization').value,
+                'hospital': document.getElementById('hospital').value.trim(),
+                'experienceYears': document.getElementById('experienceYears').value,
+                'consultationFee': document.getElementById('consultationFee').value,
+                'clinicAddress': document.getElementById('clinicAddress').value.trim(),
+                'about': document.getElementById('about').value.trim()
+            };
+            
+            const requiredFields = ['firstName', 'lastName', 'email', 'specialization'];
+            const optionalFields = ['phone', 'hospital', 'experienceYears', 'consultationFee', 'clinicAddress', 'about'];
+            
+            let completed = 0;
+            let total = requiredFields.length + optionalFields.length;
+            let missing = [];
+            
+            // Zorunlu alanları kontrol et
+            requiredFields.forEach(field => {
+                if (fields[field]) {
+                    completed++;
+                } else {
+                    missing.push(getFieldName(field) + ' (Zorunlu)');
+                }
+            });
+            
+            // İsteğe bağlı alanları kontrol et
+            optionalFields.forEach(field => {
+                if (fields[field]) {
+                    completed++;
+                } else {
+                    missing.push(getFieldName(field));
+                }
+            });
+            
+            const percentage = Math.round((completed / total) * 100);
+            
+            // Progress bar güncelle
+            document.getElementById('progressFill').style.width = percentage + '%';
+            document.getElementById('progressText').textContent = percentage + '% Tamamlandı';
+            
+            // Eksik alanları göster
+            const completenessDiv = document.getElementById('profileCompleteness');
+            if (missing.length > 0) {
+                completenessDiv.innerHTML = `
+                    <div style="margin-bottom: 1rem;">
+                        <strong style="color: #dc3545;">Eksik Alanlar:</strong>
+                    </div>
+                    <div style="font-size: 0.85rem;">
+                        ${missing.map(field => `<div style="color: #6c757d;">• ${field}</div>`).join('')}
+                    </div>
+                `;
+            } else {
+                completenessDiv.innerHTML = `
+                    <div style="color: #28a745; text-align: center;">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">🎉</div>
+                        <strong>Profiliniz Tamamlandı!</strong>
+                    </div>
+                `;
+            }
+        }
+        
+        // Alan adlarını Türkçe'ye çevir
+        function getFieldName(field) {
+            const names = {
+                'firstName': 'Ad',
+                'lastName': 'Soyad',
+                'email': 'Email',
+                'phone': 'Telefon',
+                'specialization': 'Uzmanlık Alanı',
+                'hospital': 'Hastane',
+                'experienceYears': 'Deneyim Yılı',
+                'consultationFee': 'Randevu Ücreti',
+                'clinicAddress': 'Muayenehane Adresi',
+                'about': 'Hakkında'
+            };
+            return names[field] || field;
+        }
+        
+        // Profil önizlemesi göster
+        function previewProfile() {
+            const preview = `
+                <div class="doktor-card card" style="margin: 0;">
+                    <div class="card-body text-center">
+                        <div class="doktor-avatar" style="margin: 0 auto 1rem;">
+                            ${document.getElementById('firstName').value.charAt(0).toUpperCase()}${document.getElementById('lastName').value.charAt(0).toUpperCase()}
+                        </div>
+                        
+                        <h4 class="card-title">Dr. ${document.getElementById('firstName').value} ${document.getElementById('lastName').value}</h4>
+                        
+                        <div class="doktor-specialty">${document.getElementById('specialization').value || 'Uzmanlık alanı belirtilmemiş'}</div>
+                        
+                        <div class="doktor-hospital">${document.getElementById('hospital').value || 'Hastane belirtilmemiş'}</div>
+                        
+                        <div style="margin: 1rem 0; font-size: 0.9rem; color: #6c757d;">
+                            ${document.getElementById('experienceYears').value ? `<div>📅 ${document.getElementById('experienceYears').value} yıl deneyim</div>` : ''}
+                            ${document.getElementById('consultationFee').value ? `<div>💰 ${document.getElementById('consultationFee').value} TL</div>` : ''}
+                            <div>📧 ${document.getElementById('email').value}</div>
+                            ${document.getElementById('phone').value ? `<div>📞 ${document.getElementById('phone').value}</div>` : ''}
+                        </div>
+                        
+                        ${document.getElementById('about').value ? `
+                            <div style="margin: 1rem 0; font-size: 0.85rem; color: #495057; text-align: left;">
+                                <strong>Hakkında:</strong><br>
+                                ${document.getElementById('about').value}
+                            </div>
+                        ` : ''}
+                        
+                        ${document.getElementById('clinicAddress').value ? `
+                            <div style="margin: 1rem 0; font-size: 0.85rem; color: #495057; text-align: left;">
+                                <strong>🏢 Muayenehane:</strong><br>
+                                ${document.getElementById('clinicAddress').value}
+                            </div>
+                        ` : ''}
+                        
+                        <button type="button" class="btn btn-primary w-100" disabled>
+                            📅 Randevu Al
+                        </button>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 1rem; text-align: center; color: #6c757d; font-size: 0.9rem;">
+                    Bu önizleme hastalarınızın göreceği profil kartınızı gösterir.
+                </div>
+            `;
+            
+            document.getElementById('profilePreview').innerHTML = preview;
+            document.getElementById('previewModal').style.display = 'block';
+        }
+        
+        // Önizleme modal'ını kapat
+        function closePreviewModal() {
+            document.getElementById('previewModal').style.display = 'none';
+        }
+        
+        // Modal dışına tıklanırsa kapat
+        window.onclick = function(event) {
+            const modal = document.getElementById('previewModal');
+           if (event.target == modal) {
+               closePreviewModal();
+           }
+       }
+
+       // Sayfa yüklendiğinde
+       document.addEventListener('DOMContentLoaded', function() {
+           // Profil tamamlanma durumunu hesapla
+           calculateProfileCompleteness();
+           
+           // Form alanları değiştiğinde tekrar hesapla
+           const formFields = document.querySelectorAll('#profileForm input, #profileForm select, #profileForm textarea');
+           formFields.forEach(field => {
+               field.addEventListener('input', calculateProfileCompleteness);
+               field.addEventListener('change', calculateProfileCompleteness);
+           });
+
+           // Telefon numarası formatı
+           document.getElementById('phone').addEventListener('input', function(e) {
+               let value = e.target.value.replace(/[^0-9]/g, '');
+               if (value.length > 0) {
+                   if (value.length <= 4) {
+                       value = value;
+                   } else if (value.length <= 7) {
+                       value = value.slice(0, 4) + ' ' + value.slice(4);
+                   } else if (value.length <= 9) {
+                       value = value.slice(0, 4) + ' ' + value.slice(4, 7) + ' ' + value.slice(7);
+                   } else {
+                       value = value.slice(0, 4) + ' ' + value.slice(4, 7) + ' ' + value.slice(7, 9) + ' ' + value.slice(9, 11);
+                   }
+               }
+               e.target.value = value;
+           });
+
+           // Karakter sayacı (about alanı için)
+           const aboutTextarea = document.getElementById('about');
+           if (aboutTextarea) {
+               const charCountDiv = document.createElement('div');
+               charCountDiv.style.textAlign = 'right';
+               charCountDiv.style.fontSize = '0.8rem';
+               charCountDiv.style.color = '#6c757d';
+               charCountDiv.style.marginTop = '0.25rem';
+               aboutTextarea.parentNode.appendChild(charCountDiv);
+               
+               function updateCharCount() {
+                   const remaining = 1000 - aboutTextarea.value.length;
+                   charCountDiv.textContent = `${aboutTextarea.value.length}/1000 karakter`;
+                   charCountDiv.style.color = remaining < 100 ? '#dc3545' : '#6c757d';
+               }
+               
+               aboutTextarea.addEventListener('input', updateCharCount);
+               updateCharCount();
+           }
+
+           // Form animasyonları
+           const cards = document.querySelectorAll('.card');
+           cards.forEach(card => {
+               card.addEventListener('mouseenter', function() {
+                   this.style.transform = 'translateY(-3px)';
+               });
+               
+               card.addEventListener('mouseleave', function() {
+                   this.style.transform = 'translateY(0)';
+               });
+           });
+       });
+
+       // Form validasyonu
+       document.getElementById('profileForm').addEventListener('submit', function(e) {
+           const firstName = document.getElementById('firstName').value.trim();
+           const lastName = document.getElementById('lastName').value.trim();
+           const email = document.getElementById('email').value.trim();
+           const specialization = document.getElementById('specialization').value;
+           
+           if (!firstName) {
+               e.preventDefault();
+               alert('⚠️ Lütfen adınızı girin.');
+               document.getElementById('firstName').focus();
+               return;
+           }
+           
+           if (!lastName) {
+               e.preventDefault();
+               alert('⚠️ Lütfen soyadınızı girin.');
+               document.getElementById('lastName').focus();
+               return;
+           }
+           
+           if (!email) {
+               e.preventDefault();
+               alert('⚠️ Lütfen email adresinizi girin.');
+               document.getElementById('email').focus();
+               return;
+           }
+           
+           if (!specialization) {
+               e.preventDefault();
+               alert('⚠️ Lütfen uzmanlık alanınızı seçin.');
+               document.getElementById('specialization').focus();
+               return;
+           }
+           
+           // Email format kontrolü
+           const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+           if (!emailRegex.test(email)) {
+               e.preventDefault();
+               alert('⚠️ Lütfen geçerli bir email adresi girin.');
+               document.getElementById('email').focus();
+               return;
+           }
+           
+           // Onay mesajı
+           if (!confirm('💾 Profil bilgilerinizi güncellemek istediğinizden emin misiniz?')) {
+               e.preventDefault();
+               return;
+           }
+       });
+
+       // Keyboard shortcuts
+       document.addEventListener('keydown', function(e) {
+           // Ctrl+S ile formu kaydet
+           if (e.ctrlKey && e.key === 's') {
+               e.preventDefault();
+               document.getElementById('profileForm').submit();
+           }
+           
+           // ESC ile modal'ları kapat
+           if (e.key === 'Escape') {
+               closePreviewModal();
+           }
+       });
+   </script>
+
+   <style>
+       .progress-bar {
+           width: 100%;
+           height: 20px;
+           background-color: #e9ecef;
+           border-radius: 10px;
+           overflow: hidden;
+       }
+       
+       .progress-fill {
+           height: 100%;
+           background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+           border-radius: 10px;
+           transition: width 0.5s ease;
+           width: 0%;
+       }
+       
+       .doktor-avatar {
+           width: 80px;
+           height: 80px;
+           border-radius: 50%;
+           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+           display: flex;
+           align-items: center;
+           justify-content: center;
+           font-size: 2rem;
+           color: white;
+       }
+       
+       .doktor-specialty {
+           color: #6c757d;
+           font-size: 0.9rem;
+           margin-bottom: 0.5rem;
+       }
+       
+       .doktor-hospital {
+           color: #495057;
+           font-size: 0.9rem;
+           margin-bottom: 1rem;
+       }
+       
+       .form-control:focus {
+           border-color: #007bff;
+           box-shadow: 0 0 0 3px rgba(0,123,255,0.25);
+       }
+       
+       @media (max-width: 768px) {
+           .col-8, .col-6, .col-4 {
+               flex: 0 0 100%;
+               max-width: 100%;
+           }
+           
+           .modal-content {
+               width: 95%;
+               margin: 5% auto;
+           }
+       }
+       
+       /* Animasyonlar */
+       @keyframes slideInUp {
+           from {
+               opacity: 0;
+               transform: translateY(30px);
+           }
+           to {
+               opacity: 1;
+               transform: translateY(0);
+           }
+       }
+       
+       .card {
+           animation: slideInUp 0.6s ease-out;
+       }
+       
+       /* Özel stiller */
+       .form-group {
+           position: relative;
+       }
+       
+       .form-control[readonly] {
+           cursor: not-allowed;
+       }
+       
+       .badge {
+           font-size: 0.8rem;
+           padding: 0.5rem 1rem;
+       }
+   </style>
+</body>
+</html>

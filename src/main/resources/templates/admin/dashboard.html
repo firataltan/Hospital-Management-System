@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background: #2c3e50;
+            color: white;
+        }
+        .nav-link {
+            color: white;
+            margin: 5px 0;
+        }
+        .nav-link:hover {
+            background: #34495e;
+            color: white;
+        }
+        .main-content {
+            padding: 20px;
+        }
+        .card {
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .welcome-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 sidebar p-3">
+                <h3 class="text-center mb-4">Admin Paneli</h3>
+                <div class="nav flex-column">
+                    <a class="nav-link active" href="/dashboard">
+                        <i class="fas fa-home me-2"></i> Ana Sayfa
+                    </a>
+                    <a class="nav-link" href="/doktorlar">
+                        <i class="fas fa-user-md me-2"></i> Doktorlar
+                    </a>
+                    <a class="nav-link" href="/hastalar">
+                        <i class="fas fa-users me-2"></i> Hastalar
+                    </a>
+                    <a class="nav-link" href="/randevular">
+                        <i class="fas fa-calendar-alt me-2"></i> Randevular
+                    </a>
+                    <a class="nav-link" href="/profil">
+                        <i class="fas fa-user me-2"></i> Profilim
+                    </a>
+                    <form id="logoutFormAdminDashboard" th:action="@{/perform_logout}" method="post" style="display: none;"></form>
+                    <a class="nav-link" href="#" onclick="document.getElementById('logoutFormAdminDashboard').submit(); return false;">
+                        <i class="fas fa-sign-out-alt me-2"></i> Çıkış Yap
+                    </a>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10 main-content">
+                <div class="welcome-section">
+                    <h2>Hoş Geldiniz, <span th:text="${username}">Admin</span>!</h2>
+                    <p class="text-muted">Admin panelinize hoş geldiniz. Buradan sistem yönetimini gerçekleştirebilirsiniz.</p>
+                </div>
+
+                <div class="row">
+                    <!-- İstatistikler -->
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-chart-bar me-2"></i>Sistem İstatistikleri
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row text-center">
+                                    <div class="col-6 mb-3">
+                                        <h3 class="text-primary">0</h3>
+                                        <p class="text-muted">Toplam Doktor</p>
+                                    </div>
+                                    <div class="col-6 mb-3">
+                                        <h3 class="text-success">0</h3>
+                                        <p class="text-muted">Toplam Hasta</p>
+                                    </div>
+                                    <div class="col-6">
+                                        <h3 class="text-info">0</h3>
+                                        <p class="text-muted">Bugünkü Randevu</p>
+                                    </div>
+                                    <div class="col-6">
+                                        <h3 class="text-warning">0</h3>
+                                        <p class="text-muted">Bekleyen Randevu</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Hızlı İşlemler -->
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-bolt me-2"></i>Hızlı İşlemler
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-grid gap-2">
+                                    <a href="/doktor/ekle" class="btn btn-outline-primary">
+                                        <i class="fas fa-user-plus me-2"></i>Yeni Doktor Ekle
+                                    </a>
+                                    <a href="/hastalar" class="btn btn-outline-info">
+                                        <i class="fas fa-users me-2"></i>Hastaları Yönet
+                                    </a>
+                                    <a href="/randevular" class="btn btn-outline-warning">
+                                        <i class="fas fa-calendar-check me-2"></i>Randevuları Yönet
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 
